@@ -197,6 +197,26 @@ function formatDateTime(date) {
   return `${formatDate(datePart)} ${timePart.slice(0, 5)}`;
 }
 
+function countPostWords(text = "") {
+  const chineseChars = text.match(/[\u4e00-\u9fff]/g)?.length || 0;
+  const westernWords = text
+    .replace(/[\u4e00-\u9fff]/g, " ")
+    .match(/[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*/g)?.length || 0;
+  return chineseChars + westernWords;
+}
+
+function computedReadTime(markdown = "") {
+  const withoutCode = String(markdown || "").replace(/```[\s\S]*?```/g, " ");
+  const plainText = withoutCode
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/[#>*_`~\-\d.]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const minutes = Math.max(1, Math.ceil(countPostWords(plainText) / 420));
+  return `${minutes} 分钟`;
+}
+
 function normalizeTags(value) {
   if (Array.isArray(value)) {
     return value.map((tag) => String(tag).trim()).filter(Boolean);
@@ -476,7 +496,7 @@ async function loadPosts() {
       date: data.date || "1970-01-01",
       tags,
       summary: data.summary || "",
-      readTime: data.readTime || "3 min read",
+      readTime: computedReadTime(body),
       slug,
       url: `posts/${slug}.html`,
       bodyHtml: markdownToHtml(body),
