@@ -4496,7 +4496,7 @@ body.is-scrolling .hero::after {
 /* v6.6 redesigned guestbook board */
 .guestbook-board {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(260px, 0.95fr);
+  grid-template-columns: minmax(0, 0.92fr) minmax(280px, 1.08fr);
   gap: clamp(18px, 3vw, 30px);
   align-items: stretch;
   border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
@@ -4516,7 +4516,7 @@ body.is-scrolling .hero::after {
 .guestbook-brief {
   display: grid;
   align-content: start;
-  gap: clamp(12px, 2vw, 18px);
+  gap: clamp(14px, 2vw, 20px);
   border-radius: var(--radius);
   background: color-mix(in srgb, var(--color-bg) 66%, transparent);
   padding: clamp(18px, 2.8vw, 28px);
@@ -4536,31 +4536,11 @@ body.is-scrolling .hero::after {
 }
 
 .guestbook-brief p {
-  max-width: 62ch;
+  max-width: 28ch;
   margin: 0;
   color: var(--color-text);
-  font-size: clamp(17px, 1.8vw, 22px);
-  line-height: 1.62;
-}
-
-.guestbook-brief__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: clamp(12px, 2vw, 18px);
-}
-
-.guestbook-brief__meta span {
-  border: 0;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-surface) 76%, transparent);
-  padding: 7px 10px;
-  color: color-mix(in srgb, var(--color-text) 66%, transparent);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 760;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: clamp(18px, 2.2vw, 28px);
+  line-height: 1.42;
 }
 
 .guestbook-protocol {
