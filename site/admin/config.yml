@@ -2,6 +2,7 @@ backend:
   name: github
   repo: maki-cloud7/maki-s-blog
   branch: main
+  auth_methods: [token]
 
 site_url: https://maki-s-blog.vercel.app
 display_url: https://maki-s-blog.vercel.app
@@ -80,3 +81,16 @@ collections:
             label: 标签列表
             widget: list
             default: ["Notes"]
+
+      - name: socials
+        label: 社交链接
+        file: site/content/socials.json
+        format: json
+        fields:
+          - name: socials
+            label: 社交链接列表
+            widget: list
+            summary: "{{fields.label}}"
+            fields:
+              - { name: label, label: 名称, widget: string }
+              - { name: url, label: 链接, widget: string }

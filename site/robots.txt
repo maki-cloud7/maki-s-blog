@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://maki-s-blog.vercel.app/sitemap.xml

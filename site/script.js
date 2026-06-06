@@ -212,10 +212,6 @@ const pageSections = Array.from(document.querySelectorAll("[data-page-section]")
 const railLinks = Array.from(document.querySelectorAll("[data-rail-link]"));
 const innerPage = document.querySelector(".inner-page");
 const spotlightCards = Array.from(document.querySelectorAll(".composition-card, .friend-card, .project-card, .profile-card, .article-item, .guestbook-panel, .guestbook-signal"));
-const guestbookForm = document.querySelector("[data-guestbook-form]");
-const guestbookMessage = document.querySelector("[data-guestbook-message]");
-const guestbookStatus = document.querySelector("[data-guestbook-status]");
-const guestbookList = document.querySelector("[data-guestbook-list]");
 const localClock = document.querySelector("[data-local-clock]");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -482,7 +478,6 @@ function applyLanguage(lang) {
 
   resetTypewriter();
   updateArticleFilters();
-  renderGuestbookEntries();
 }
 
 function splitPhraseTokens(phrase) {
@@ -670,51 +665,6 @@ function updateArticleFilters() {
   }
 }
 
-function getGuestbookEntries() {
-  try {
-    return JSON.parse(localStorage.getItem("maki-guestbook") || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function saveGuestbookEntries(entries) {
-  localStorage.setItem("maki-guestbook", JSON.stringify(entries));
-}
-
-function renderGuestbookEntries() {
-  if (!guestbookList) {
-    return;
-  }
-
-  const entries = getGuestbookEntries();
-  guestbookList.textContent = "";
-
-  if (!entries.length) {
-    const empty = document.createElement("p");
-    empty.className = "guestbook-empty";
-    empty.textContent = copy[currentLang]["guestbook.empty"];
-    guestbookList.append(empty);
-    return;
-  }
-
-  entries.forEach((entry) => {
-    const item = document.createElement("article");
-    item.className = "guestbook-entry";
-
-    const meta = document.createElement("p");
-    meta.className = "guestbook-entry__meta";
-    meta.textContent = `${entry.author} / ${entry.date}`;
-
-    const body = document.createElement("p");
-    body.className = "guestbook-entry__body";
-    body.textContent = entry.message;
-
-    item.append(meta, body);
-    guestbookList.append(item);
-  });
-}
-
 document.querySelectorAll(".nav-link").forEach((link) => {
   const linkPath = new URL(link.getAttribute("href"), window.location.href).pathname;
   const currentPath = window.location.pathname.endsWith("/") ? `${window.location.pathname}index.html` : window.location.pathname;
@@ -728,34 +678,6 @@ document.querySelectorAll(".nav-link").forEach((link) => {
 navToggle?.addEventListener("click", () => {
   const isOpen = siteNav.classList.toggle("is-open");
   navToggle.setAttribute("aria-expanded", String(isOpen));
-});
-
-guestbookForm?.addEventListener("submit", (event) => {
-  event.preventDefault();
-
-  const message = guestbookMessage?.value.trim() || "";
-
-  if (!message) {
-    if (guestbookStatus) {
-      guestbookStatus.textContent = copy[currentLang]["guestbook.form.empty"];
-    }
-    return;
-  }
-
-  const entries = getGuestbookEntries();
-  entries.unshift({
-    author: copy[currentLang]["guestbook.anonymous"],
-    message,
-    date: new Date().toLocaleDateString(currentLang === "zh" ? "zh-CN" : "en-US"),
-  });
-  saveGuestbookEntries(entries);
-
-  guestbookForm.reset();
-  renderGuestbookEntries();
-
-  if (guestbookStatus) {
-    guestbookStatus.textContent = copy[currentLang]["guestbook.form.success"];
-  }
 });
 
 siteNav?.addEventListener("click", (event) => {

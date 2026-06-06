@@ -7,8 +7,12 @@ const postsDir = path.join(root, "content", "posts");
 const projectsFile = path.join(root, "content", "projects.json");
 const friendsFile = path.join(root, "content", "friends.json");
 const tagsFile = path.join(root, "content", "tags.json");
+const socialsFile = path.join(root, "content", "socials.json");
 const outputDir = path.join(root, "posts");
 const assetVersion = "6.0-content-system";
+const siteUrl = "https://maki-s-blog.vercel.app";
+const siteTitle = "maki's blog";
+const siteDescription = "maki 的个人博客，用来记录技术、想法、作品和生活。";
 
 function escapeHtml(value = "") {
   return String(value)
@@ -145,6 +149,182 @@ function normalizeList(value, key) {
   return [];
 }
 
+function normalizeUrl(url = "") {
+  if (!url) {
+    return "#";
+  }
+  return url;
+}
+
+function isExternalUrl(url = "") {
+  return /^https?:\/\//.test(url);
+}
+
+function absoluteUrl(urlPath = "") {
+  if (isExternalUrl(urlPath)) {
+    return urlPath;
+  }
+  return `${siteUrl}/${urlPath.replace(/^\/+/, "")}`;
+}
+
+function renderFooterSocial(socials) {
+  if (!socials.length) {
+    return "";
+  }
+
+  return `      <div class="footer-social">
+${socials.map((social) => {
+  const url = normalizeUrl(social.url);
+  const externalAttrs = isExternalUrl(url) ? ' target="_blank" rel="noopener noreferrer"' : "";
+  return `        <a href="${escapeHtml(url)}"${externalAttrs} class="social-link"><span class="social-label">${escapeHtml(social.label)}</span></a>`;
+}).join("\n")}
+      </div>`;
+}
+
+function replaceFooterSocial(html, socials) {
+  const footer = renderFooterSocial(socials);
+  return html.replace(/\n\s*<div class="footer-social">[\s\S]*?<\/div>\s*(?=\n\s*<div class="footer-bottom">)/, `\n${footer}`);
+}
+
+function ensureHeadMeta(html, { urlPath, title, description }) {
+  const canonical = absoluteUrl(urlPath);
+  const escapedTitle = escapeHtml(title);
+  const escapedDescription = escapeHtml(description);
+
+  let next = html
+    .replace(/<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${escapedDescription}" />`)
+    .replace(/\n\s*<link rel="canonical" href="[^"]*" \/>/g, "")
+    .replace(/\n\s*<meta property="og:[^"]+" content="[^"]*" \/>/g, "")
+    .replace(/\n\s*<meta name="twitter:[^"]+" content="[^"]*" \/>/g, "")
+    .replace(/\n\s*<link rel="icon" href="[^"]*" \/>/g, "");
+
+  const seo = `    <link rel="canonical" href="${canonical}" />
+    <link rel="icon" href="/favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="${escapeHtml(siteTitle)}" />
+    <meta property="og:title" content="${escapedTitle}" />
+    <meta property="og:description" content="${escapedDescription}" />
+    <meta property="og:url" content="${canonical}" />
+    <meta name="twitter:card" content="summary" />`;
+
+  next = next.replace(/(\s*<link rel="stylesheet")/, `\n${seo}$1`);
+  return next;
+}
+
+function renderGuestbookPage(html) {
+  return html
+    .replace('<a href="#guestbook-archive" data-rail-link>02 / archive</a>', "")
+    .replace("guestbook // local notes", "guestbook // public notes")
+    .replace(
+    /<section class="page-panel" id="guestbook-panel"[\s\S]*?<\/section>\s*<\/main>/,
+    `<section class="page-panel" id="guestbook-panel" aria-label="留言板" data-page-section>
+        <div class="guestbook-layout guestbook-layout--comments">
+          <aside class="guestbook-signal" aria-hidden="true">
+            <span>public channel</span>
+            <strong>notes, visible to everyone.</strong>
+            <div class="guestbook-signal__rows">
+              <span>github</span>
+              <span>issues</span>
+              <span>public</span>
+            </div>
+          </aside>
+          <div class="guestbook-panel guestbook-panel--comments">
+            <section class="guestbook-panel__intro" aria-labelledby="guestbook-compose-title">
+              <span>public comments</span>
+              <h2 id="guestbook-compose-title" data-i18n="guestbook.panel.title">留言板 / Guestbook</h2>
+              <p>这里使用 GitHub Issues 保存留言。登录 GitHub 后即可留言，所有访客都能看到。</p>
+            </section>
+            <section class="guestbook-comments" aria-label="公开留言">
+              <script
+                src="https://utteranc.es/client.js"
+                repo="maki-cloud7/maki-s-blog"
+                issue-term="pathname"
+                label="guestbook"
+                theme="github-light"
+                crossorigin="anonymous"
+                async>
+              </script>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>`,
+  );
+}
+
+function renderSitemap(posts) {
+  const staticPages = ["", "index.html", "articles.html", "projects.html", "friends.html", "guestbook.html", "about.html"];
+  const urls = [
+    ...staticPages.map((page) => ({ loc: absoluteUrl(page), priority: page === "" ? "1.0" : "0.8" })),
+    ...posts.map((post) => ({ loc: absoluteUrl(post.url), priority: "0.7" })),
+  ];
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((item) => `  <url>
+    <loc>${item.loc}</loc>
+    <priority>${item.priority}</priority>
+  </url>`).join("\n")}
+</urlset>
+`;
+}
+
+function renderRobots() {
+  return `User-agent: *
+Allow: /
+
+Sitemap: ${siteUrl}/sitemap.xml
+`;
+}
+
+function renderFavicon() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="#101010"/>
+  <circle cx="50" cy="14" r="5" fill="#e11919"/>
+  <text x="12" y="43" fill="#f7f7f4" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="900">m</text>
+</svg>
+`;
+}
+
+function renderNotFoundPage(socials) {
+  return `<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page not found - maki's blog</title>
+    <meta name="description" content="这个页面不存在。" />
+    <link rel="canonical" href="${siteUrl}/404.html" />
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="styles.css?v=${assetVersion}" />
+  </head>
+  <body>
+    <div class="site-line" aria-hidden="true"></div>
+    <main class="page post-page inner-page">
+      <article class="post-shell">
+        <a class="post-back" href="index.html">← 回到首页</a>
+        <header class="post-header">
+          <span class="page-heading__index">404 // not found</span>
+          <h1>页面不存在</h1>
+          <p>这个地址没有对应的页面。可以回到首页，或者查看文章与项目。</p>
+        </header>
+        <div class="post-content">
+          <p><a href="articles.html">查看文章</a> / <a href="projects.html">查看项目</a></p>
+        </div>
+      </article>
+    </main>
+    <footer class="site-footer">
+${renderFooterSocial(socials)}
+      <div class="footer-bottom">
+        <p>© 2026 maki. Built for notes, ideas, and experiments.</p>
+        <a href="index.html">回到首页</a>
+      </div>
+    </footer>
+  </body>
+</html>
+`;
+}
+
 async function loadPosts() {
   const files = (await readdir(postsDir)).filter((file) => file.endsWith(".md") && file !== "README.md");
   const posts = [];
@@ -223,9 +403,9 @@ ${post.tags.map((tag) => `                <span>${escapeHtml(tag)}</span>`).join
   }).join("\n");
 }
 
-function renderPostPage(post) {
+function renderPostPage(post, socials) {
   const tags = post.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("");
-  return `<!doctype html>
+  const html = `<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
@@ -281,6 +461,7 @@ ${post.bodyHtml}
     </main>
 
     <footer class="site-footer">
+${renderFooterSocial(socials)}
       <div class="footer-bottom">
         <p data-i18n="footer.copy">© 2026 maki. Built for notes, ideas, and experiments.</p>
         <a href="../index.html" data-i18n="footer.back">回到首页</a>
@@ -291,6 +472,11 @@ ${post.bodyHtml}
   </body>
 </html>
 `;
+  return ensureHeadMeta(html, {
+    urlPath: post.url,
+    title: `${post.title} - ${siteTitle}`,
+    description: post.summary,
+  });
 }
 
 function renderProjects(projects) {
@@ -317,11 +503,18 @@ async function main() {
   const posts = await loadPosts();
   const projects = normalizeList(await readJson(projectsFile), "projects");
   const friends = normalizeList(await readJson(friendsFile), "friends");
+  const socials = normalizeList(await readJson(socialsFile), "socials");
   globalThis.configuredTags = normalizeList(await readJson(tagsFile), "tags");
   await mkdir(outputDir, { recursive: true });
 
   let indexHtml = await readFile(path.join(root, "index.html"), "utf8");
   indexHtml = replaceBetween(indexHtml, "HOME", renderHomeCards(posts));
+  indexHtml = replaceFooterSocial(indexHtml, socials);
+  indexHtml = ensureHeadMeta(indexHtml, {
+    urlPath: "index.html",
+    title: siteTitle,
+    description: siteDescription,
+  });
   indexHtml = indexHtml.replaceAll("styles.css?v=6.0-native-scroll", `styles.css?v=${assetVersion}`);
   indexHtml = indexHtml.replaceAll("script.js?v=6.0-native-scroll", `script.js?v=${assetVersion}`);
   indexHtml = indexHtml.replaceAll("styles.css?v=6.0-markdown-posts", `styles.css?v=${assetVersion}`);
@@ -333,6 +526,12 @@ async function main() {
   articlesHtml = replaceBetween(articlesHtml, "ARCHIVE", renderArchiveItems(posts));
   articlesHtml = articlesHtml.replace(/archive \/\/ \d+ entries/g, `archive // ${String(posts.length).padStart(3, "0")} entries`);
   articlesHtml = articlesHtml.replace(/<span data-article-count>.*?<\/span>/, `<span data-article-count>${posts.length} articles</span>`);
+  articlesHtml = replaceFooterSocial(articlesHtml, socials);
+  articlesHtml = ensureHeadMeta(articlesHtml, {
+    urlPath: "articles.html",
+    title: `文章 - ${siteTitle}`,
+    description: "maki 的文章列表，收集技术、设计、工作流和生活笔记。",
+  });
   articlesHtml = articlesHtml.replaceAll("styles.css?v=6.0-native-scroll", `styles.css?v=${assetVersion}`);
   articlesHtml = articlesHtml.replaceAll("script.js?v=6.0-native-scroll", `script.js?v=${assetVersion}`);
   articlesHtml = articlesHtml.replaceAll("styles.css?v=6.0-markdown-posts", `styles.css?v=${assetVersion}`);
@@ -341,6 +540,12 @@ async function main() {
 
   let projectsHtml = await readFile(path.join(root, "projects.html"), "utf8");
   projectsHtml = replaceContentBetween(projectsHtml, "PROJECTS", renderProjects(projects));
+  projectsHtml = replaceFooterSocial(projectsHtml, socials);
+  projectsHtml = ensureHeadMeta(projectsHtml, {
+    urlPath: "projects.html",
+    title: `项目 / 作品 - ${siteTitle}`,
+    description: "maki 的项目和作品列表。",
+  });
   projectsHtml = projectsHtml
     .replaceAll("styles.css?v=6.0-native-scroll", `styles.css?v=${assetVersion}`)
     .replaceAll("script.js?v=6.0-native-scroll", `script.js?v=${assetVersion}`)
@@ -350,6 +555,12 @@ async function main() {
 
   let friendsHtml = await readFile(path.join(root, "friends.html"), "utf8");
   friendsHtml = replaceContentBetween(friendsHtml, "FRIENDS", renderFriends(friends));
+  friendsHtml = replaceFooterSocial(friendsHtml, socials);
+  friendsHtml = ensureHeadMeta(friendsHtml, {
+    urlPath: "friends.html",
+    title: `友链 - ${siteTitle}`,
+    description: "maki 的友链和常常回访的角落。",
+  });
   friendsHtml = friendsHtml
     .replaceAll("styles.css?v=6.0-native-scroll", `styles.css?v=${assetVersion}`)
     .replaceAll("script.js?v=6.0-native-scroll", `script.js?v=${assetVersion}`)
@@ -357,9 +568,30 @@ async function main() {
     .replaceAll("script.js?v=6.0-markdown-posts", `script.js?v=${assetVersion}`);
   await writeFile(path.join(root, "friends.html"), friendsHtml);
 
+  const pageMeta = {
+    "about.html": {
+      title: `关于 - ${siteTitle}`,
+      description: "关于 maki，以及这个长期更新的个人博客。",
+    },
+    "guestbook.html": {
+      title: `留言板 - ${siteTitle}`,
+      description: "在 maki 的公开留言板留下想法、问题或建议。",
+    },
+  };
+
   for (const file of ["about.html", "guestbook.html"]) {
     const filePath = path.join(root, file);
-    const html = (await readFile(filePath, "utf8"))
+    let html = await readFile(filePath, "utf8");
+    if (file === "guestbook.html") {
+      html = renderGuestbookPage(html);
+    }
+    html = replaceFooterSocial(html, socials);
+    html = ensureHeadMeta(html, {
+      urlPath: file,
+      title: pageMeta[file].title,
+      description: pageMeta[file].description,
+    });
+    html = html
       .replaceAll("styles.css?v=6.0-native-scroll", `styles.css?v=${assetVersion}`)
       .replaceAll("script.js?v=6.0-native-scroll", `script.js?v=${assetVersion}`)
       .replaceAll("styles.css?v=6.0-markdown-posts", `styles.css?v=${assetVersion}`)
@@ -368,8 +600,13 @@ async function main() {
   }
 
   for (const post of posts) {
-    await writeFile(path.join(outputDir, `${post.slug}.html`), renderPostPage(post));
+    await writeFile(path.join(outputDir, `${post.slug}.html`), renderPostPage(post, socials));
   }
+
+  await writeFile(path.join(root, "sitemap.xml"), renderSitemap(posts));
+  await writeFile(path.join(root, "robots.txt"), renderRobots());
+  await writeFile(path.join(root, "favicon.svg"), renderFavicon());
+  await writeFile(path.join(root, "404.html"), renderNotFoundPage(socials));
 
   console.log(`Generated ${posts.length} posts, ${projects.length} projects, and ${friends.length} friends.`);
 }
