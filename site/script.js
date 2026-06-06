@@ -206,6 +206,7 @@ const articleCount = document.querySelector("[data-article-count]");
 const emptyArticles = document.querySelector("[data-empty-articles]");
 const clearArticles = document.querySelector("[data-clear-articles]");
 const tagButtons = Array.from(document.querySelectorAll("[data-filter-tag]"));
+const blogTools = document.querySelector(".blog-tools");
 const aboutCards = Array.from(document.querySelectorAll("[data-about-card]"));
 const revealItems = Array.from(document.querySelectorAll(".reveal-on-scroll"));
 const pageSections = Array.from(document.querySelectorAll("[data-page-section]"));
@@ -214,6 +215,7 @@ const innerPage = document.querySelector(".inner-page");
 const spotlightCards = Array.from(document.querySelectorAll(".composition-card, .friend-card, .project-card, .profile-card, .article-item, .guestbook-panel, .guestbook-signal"));
 const localClock = document.querySelector("[data-local-clock]");
 const postShell = document.querySelector("[data-post-source]");
+const isArticleIndex = Boolean(document.querySelector(".article-list--archive"));
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 let phraseIndex = 0;
@@ -718,6 +720,25 @@ ${String(body || "").trim()}
 `;
 }
 
+function slugifyPost(value = "") {
+  const slug = String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fa5]+/gi, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug || "untitled";
+}
+
+function todayIsoDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function buildNewPostPath(form) {
+  const data = collectEditorData(form);
+  const date = data.date || todayIsoDate();
+  return `site/content/posts/${date}-${slugifyPost(data.title)}.md`;
+}
+
 function markdownPreview(markdown = "") {
   return markdown
     .split(/\n{2,}/)
@@ -760,15 +781,16 @@ function collectEditorData(form) {
   };
 }
 
-function renderEditorPanel(post) {
+function renderEditorPanel(post, options = {}) {
   const { data, body } = parseMarkdownPost(post.content);
+  const mode = options.mode || "edit";
   const panel = document.createElement("section");
   panel.className = "post-editor";
   panel.setAttribute("aria-label", "文章编辑器");
   panel.innerHTML = `
     <form class="post-editor__form" data-editor-form>
       <div class="post-editor__top">
-        <span>owner editor</span>
+        <span>${mode === "create" ? "new post" : "owner editor"}</span>
         <button class="post-editor__ghost" type="button" data-editor-close>Close</button>
       </div>
       <label>
@@ -782,7 +804,7 @@ function renderEditorPanel(post) {
       <div class="post-editor__grid">
         <label>
           <span>Date</span>
-          <input name="date" type="date" value="${escapeHtml(data.date || "")}" required />
+          <input name="date" type="date" value="${escapeHtml(data.date || todayIsoDate())}" required />
         </label>
         <label>
           <span>Read time</span>
@@ -803,7 +825,7 @@ function renderEditorPanel(post) {
       </label>
       <div class="post-editor__preview post-content" data-editor-preview hidden></div>
       <div class="post-editor__actions">
-        <button class="post-editor__button" type="submit">Save to GitHub</button>
+        <button class="post-editor__button" type="submit">${mode === "create" ? "Create Post" : "Save to GitHub"}</button>
         <button class="post-editor__ghost" type="button" data-editor-preview-toggle>Preview</button>
         <span class="post-editor__status" data-editor-status></span>
       </div>
@@ -825,23 +847,24 @@ function renderEditorPanel(post) {
     event.preventDefault();
     setEditorStatus(panel, "Saving...");
     const content = serializeMarkdownPost(collectEditorData(form), form.elements.body.value);
+    const path = mode === "create" ? buildNewPostPath(form) : post.path;
 
     try {
       const response = await fetch("/api/post", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          path: postShell.dataset.postSource,
+          path,
           content,
-          sha: editorSha,
-          message: `Update post: ${form.elements.title.value.trim()}`,
+          sha: mode === "create" ? "" : editorSha,
+          message: `${mode === "create" ? "Create" : "Update"} post: ${form.elements.title.value.trim()}`,
         }),
       });
       const result = await response.json();
       if (!response.ok) {
         throw new Error(result.error || "Save failed");
       }
-      setEditorStatus(panel, "Saved. Vercel will redeploy shortly.", "success");
+      setEditorStatus(panel, mode === "create" ? "Created. Vercel will redeploy shortly." : "Saved. Vercel will redeploy shortly.", "success");
       editorSha = result.sha || editorSha;
     } catch (error) {
       setEditorStatus(panel, error.message, "error");
@@ -875,21 +898,103 @@ async function openPostEditor() {
   }
 }
 
+function emptyPostSource() {
+  return `---
+title: 
+date: ${todayIsoDate()}
+tags: Notes
+summary: 
+readTime: 5 min read
+draft: false
+---
+
+Start writing here.
+`;
+}
+
+function openNewPostEditor() {
+  if (!blogTools || document.querySelector(".post-editor")) {
+    return;
+  }
+
+  const panel = renderEditorPanel({
+    path: "",
+    sha: "",
+    content: emptyPostSource(),
+  }, { mode: "create" });
+  blogTools.insertAdjacentElement("afterend", panel);
+  panel.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
+}
+
+async function deleteCurrentPost() {
+  if (!postShell?.dataset.postSource) {
+    return;
+  }
+
+  const confirmed = window.confirm("Delete this post? This commits the Markdown deletion to GitHub.");
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    let sha = editorSha;
+    if (!sha) {
+      const source = await fetch(`/api/post?path=${encodeURIComponent(postShell.dataset.postSource)}`);
+      const post = await source.json();
+      if (!source.ok) {
+        throw new Error(post.error || "Could not load source post");
+      }
+      sha = post.sha;
+    }
+
+    const response = await fetch("/api/post", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: postShell.dataset.postSource,
+        sha,
+        message: "Delete post from site editor",
+      }),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || "Delete failed");
+    }
+    window.alert("Deleted. Vercel will redeploy shortly.");
+    window.location.href = "../articles.html";
+  } catch (error) {
+    window.alert(error.message);
+  }
+}
+
 function renderOwnerToolbar(session) {
-  if (!postShell || document.querySelector("[data-editor-toolbar]")) {
+  if ((!postShell && !isArticleIndex) || document.querySelector("[data-editor-toolbar]")) {
     return;
   }
 
   const toolbar = document.createElement("div");
   toolbar.className = "owner-toolbar";
+  if (!postShell) {
+    toolbar.classList.add("owner-toolbar--archive");
+  }
   toolbar.dataset.editorToolbar = "true";
+  const actions = postShell
+    ? '<button type="button" data-editor-edit>Edit</button><button type="button" data-editor-delete>Delete</button>'
+    : '<button type="button" data-editor-new>New Post</button>';
   toolbar.innerHTML = `
     <span>${escapeHtml(session.login)}</span>
-    <button type="button">Edit</button>
+    ${actions}
     <a href="/api/auth/logout">Sign out</a>
   `;
-  toolbar.querySelector("button")?.addEventListener("click", openPostEditor);
-  postShell.insertBefore(toolbar, postShell.querySelector(".post-back")?.nextSibling || postShell.firstChild);
+  toolbar.querySelector("[data-editor-edit]")?.addEventListener("click", openPostEditor);
+  toolbar.querySelector("[data-editor-delete]")?.addEventListener("click", deleteCurrentPost);
+  toolbar.querySelector("[data-editor-new]")?.addEventListener("click", openNewPostEditor);
+
+  if (postShell) {
+    postShell.insertBefore(toolbar, postShell.querySelector(".post-back")?.nextSibling || postShell.firstChild);
+  } else {
+    blogTools?.insertAdjacentElement("beforebegin", toolbar);
+  }
 }
 
 async function initOwnerEditor() {
@@ -902,7 +1007,7 @@ async function initOwnerEditor() {
     return;
   }
 
-  if (!postShell) {
+  if (!postShell && !isArticleIndex) {
     return;
   }
 

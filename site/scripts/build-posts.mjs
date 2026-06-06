@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -500,13 +500,21 @@ function renderFriends(friends) {
           </a>`).join("\n");
 }
 
+async function cleanGeneratedPosts() {
+  await mkdir(outputDir, { recursive: true });
+  const files = await readdir(outputDir);
+  await Promise.all(files
+    .filter((file) => file.endsWith(".html"))
+    .map((file) => unlink(path.join(outputDir, file))));
+}
+
 async function main() {
   const posts = await loadPosts();
   const projects = normalizeList(await readJson(projectsFile), "projects");
   const friends = normalizeList(await readJson(friendsFile), "friends");
   const socials = normalizeList(await readJson(socialsFile), "socials");
   globalThis.configuredTags = normalizeList(await readJson(tagsFile), "tags");
-  await mkdir(outputDir, { recursive: true });
+  await cleanGeneratedPosts();
 
   let indexHtml = await readFile(path.join(root, "index.html"), "utf8");
   indexHtml = replaceBetween(indexHtml, "HOME", renderHomeCards(posts));

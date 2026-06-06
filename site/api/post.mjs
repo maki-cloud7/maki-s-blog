@@ -45,16 +45,13 @@ export default async function handler(req, res) {
       const content = String(body.content || "");
       const sha = String(body.sha || "");
       const message = String(body.message || "Update post from site editor").slice(0, 180);
-      const current = await githubRequest(`/repos/${repo.owner}/${repo.repo}/contents/${encodeURIComponent(filePath).replaceAll("%2F", "/")}?ref=${repo.branch}`, {
-        token: session.token,
-      });
       const result = await githubRequest(`/repos/${repo.owner}/${repo.repo}/contents/${encodeURIComponent(filePath).replaceAll("%2F", "/")}`, {
         token: session.token,
         method: "PUT",
         body: {
           message,
           content: encodeContent(content),
-          sha: sha || current.sha,
+          ...(sha ? { sha } : {}),
           branch: repo.branch,
         },
       });
@@ -68,7 +65,38 @@ export default async function handler(req, res) {
       return;
     }
 
-    res.setHeader("Allow", "GET, PUT");
+    if (req.method === "DELETE") {
+      const chunks = [];
+      for await (const chunk of req) {
+        chunks.push(chunk);
+      }
+
+      const body = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
+      const filePath = safePostPath(body.path);
+      const sha = String(body.sha || "");
+      const message = String(body.message || "Delete post from site editor").slice(0, 180);
+      const current = sha ? { sha } : await githubRequest(`/repos/${repo.owner}/${repo.repo}/contents/${encodeURIComponent(filePath).replaceAll("%2F", "/")}?ref=${repo.branch}`, {
+        token: session.token,
+      });
+      const result = await githubRequest(`/repos/${repo.owner}/${repo.repo}/contents/${encodeURIComponent(filePath).replaceAll("%2F", "/")}`, {
+        token: session.token,
+        method: "DELETE",
+        body: {
+          message,
+          sha: current.sha,
+          branch: repo.branch,
+        },
+      });
+
+      sendJson(res, 200, {
+        ok: true,
+        commit: result.commit?.sha,
+        url: result.commit?.html_url,
+      });
+      return;
+    }
+
+    res.setHeader("Allow", "GET, PUT, DELETE");
     sendJson(res, 405, { error: "Method not allowed" });
   } catch (error) {
     sendError(res, error);

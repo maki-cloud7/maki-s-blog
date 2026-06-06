@@ -226,7 +226,7 @@ export async function requireAuthorizedSession(req) {
 
 export function safePostPath(value) {
   const filePath = String(value || "").trim();
-  if (!/^site\/content\/posts\/[a-z0-9][a-z0-9._-]*\.md$/i.test(filePath)) {
+  if (!/^site\/content\/posts\/[a-z0-9\u4e00-\u9fa5][a-z0-9\u4e00-\u9fa5._-]*\.md$/i.test(filePath)) {
     const error = new Error("Invalid post path");
     error.status = 400;
     throw error;

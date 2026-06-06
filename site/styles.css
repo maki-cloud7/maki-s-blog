@@ -936,6 +936,10 @@ body.is-scrolling .hero::after {
   color: var(--color-muted);
 }
 
+.owner-toolbar--archive {
+  margin: 0 0 clamp(18px, 3vw, 28px);
+}
+
 .owner-toolbar button,
 .owner-toolbar a,
 .post-editor__button,

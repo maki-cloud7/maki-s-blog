@@ -47,15 +47,21 @@ The script updates:
 
 ## Owner Inline Editor
 
-Article pages support a hidden owner-only editor. Visitors do not see an edit button.
+The writing pages support a hidden owner-only editor. Visitors do not see editing controls.
 
-To sign in, open a post with `?login=1`, for example:
+To sign in, open the article list or a post with `?login=1`, for example:
 
 ```text
+/articles.html?login=1
 /posts/2026-06-03-first-week.html?login=1
 ```
 
-After GitHub approves the login, the article page checks `/api/me`. The edit button is inserted only when the signed-in account is allowed and has write access to the repository.
+After GitHub approves the login, the page checks `/api/me`. Editing controls are inserted only when the signed-in account is allowed and has write access to the repository.
+
+- `articles.html`: create a new post.
+- `posts/*.html`: edit or delete the current post.
+
+Tags entered in a post's front matter are collected by the build script and become article filter buttons after Vercel redeploys.
 
 Required Vercel environment variables:
 
