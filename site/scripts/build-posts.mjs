@@ -214,7 +214,7 @@ function computedReadTime(markdown = "") {
     .replace(/\s+/g, " ")
     .trim();
   const minutes = Math.max(1, Math.ceil(countPostWords(plainText) / 420));
-  return `${minutes} 分钟`;
+  return `${minutes} MIN READ`;
 }
 
 function normalizeTags(value) {

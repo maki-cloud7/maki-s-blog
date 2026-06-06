@@ -754,7 +754,7 @@ function initPostStats() {
   }
 
   if (readTarget) {
-    readTarget.textContent = currentLang === "zh" ? `${minutes} 分钟` : `${minutes} min`;
+    readTarget.textContent = `${minutes} MIN READ`;
   }
 }
 
