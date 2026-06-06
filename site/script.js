@@ -1648,7 +1648,7 @@ window.addEventListener("keydown", (event) => {
       hLine.setAttribute("y1", y);
       hLine.setAttribute("x2", width);
       hLine.setAttribute("y2", y);
-      hLine.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.04)" : "rgba(16,16,16,0.035)");
+      hLine.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.085)" : "rgba(16,16,16,0.07)");
       hLine.setAttribute("stroke-width", "1");
       hGroup.appendChild(hLine);
     }
@@ -1660,7 +1660,7 @@ window.addEventListener("keydown", (event) => {
       const x = i * GRID_SIZE;
       const line = document.createElementNS(NS, "path");
       line.setAttribute("d", `M ${x},0 L ${x},${height}`);
-      line.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.04)" : "rgba(16,16,16,0.035)");
+      line.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.085)" : "rgba(16,16,16,0.07)");
       line.setAttribute("stroke-width", "1");
       lineGroup.appendChild(line);
       const glowLine = document.createElementNS(NS, "path");
@@ -1693,14 +1693,14 @@ window.addEventListener("keydown", (event) => {
     if (Math.abs(bend) < 0.05 || mouseY < -100) {
       d = `M ${x},0 L ${x},${height}`;
       line.glowEl.setAttribute("stroke", "rgba(179,42,37,0)");
-      line.lineEl.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.04)" : "rgba(16,16,16,0.035)");
+      line.lineEl.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.085)" : "rgba(16,16,16,0.07)");
     } else {
       const cpX = x + bend;
       d = `M ${x},0 L ${x},${top} Q ${cpX},${mouseY} ${x},${bottom} L ${x},${height}`;
       const bendRatio = Math.min(1, Math.abs(bend) / MAX_BEND);
-      const glowAlpha = (bendRatio * 0.36).toFixed(3);
+      const glowAlpha = (bendRatio * 0.52).toFixed(3);
       line.glowEl.setAttribute("stroke", `rgba(179,42,37,${glowAlpha})`);
-      line.lineEl.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.085)" : "rgba(16,16,16,0.07)");
+      line.lineEl.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.14)" : "rgba(16,16,16,0.12)");
     }
     line.lineEl.setAttribute("d", d);
     line.glowEl.setAttribute("d", d);
