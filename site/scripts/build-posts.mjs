@@ -605,7 +605,7 @@ function renderPostPage(post, socials) {
           <span class="page-heading__index post-meta-line">
             <span>${escapeHtml(formatDateTime(post.date))}</span>
             <span data-post-word-count>--</span>
-            <span data-post-read-time>${escapeHtml(post.readTime)}</span>
+            <span data-post-read-time>--</span>
             <span><span data-post-view-count>--</span> 浏览</span>
           </span>
           <h1 id="post-title">${escapeHtml(post.title)}</h1>
