@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>关于前端体验的一些笔记 - maki's blog</title>
+    <meta name="description" content="一些关于界面节奏、状态反馈、排版和微交互的观察。" />
+    <link rel="stylesheet" href="../styles.css?v=6.0-content-system" />
+  </head>
+  <body>
+    <div class="site-line" aria-hidden="true"></div>
+    <header class="site-header">
+      <div class="header-actions" aria-label="站点设置">
+        <button class="rotary-knob" type="button" aria-label="Scroll control" data-rotary-knob>
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle class="rotary-knob__outer" cx="32" cy="32" r="27" />
+            <circle class="rotary-knob__inner" cx="32" cy="32" r="18" />
+            <path class="rotary-knob__grip" d="M32 9v10M32 45v10M9 32h10M45 32h10M15.7 15.7l7 7M41.3 41.3l7 7M48.3 15.7l-7 7M22.7 41.3l-7 7" />
+            <path class="rotary-knob__indicator" d="M32 32V17" />
+          </svg>
+        </button>
+        <button class="utility-button" type="button" data-lang-toggle aria-label="Switch language">EN</button>
+        <button class="utility-button" type="button" data-theme-toggle aria-label="Toggle dark mode">Dark</button>
+      </div>
+      <a class="brand" href="../index.html" aria-label="maki blog home">maki</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+      </button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a class="nav-link" href="../index.html"><span data-i18n="nav.home">首页</span></a>
+        <a class="nav-link" href="../articles.html"><span data-i18n="nav.articles">文章</span></a>
+        <a class="nav-link" href="../projects.html"><span data-i18n="nav.projects">项目</span></a>
+        <a class="nav-link" href="../friends.html"><span data-i18n="nav.friends">友链</span></a>
+        <a class="nav-link" href="../guestbook.html"><span data-i18n="nav.guestbook">留言板</span></a>
+        <a class="nav-link" href="../about.html"><span data-i18n="nav.about">关于</span></a>
+      </nav>
+    </header>
+
+    <main class="page post-page inner-page">
+      <article class="post-shell">
+        <a class="post-back" href="../articles.html">← 返回文章列表</a>
+        <header class="post-header">
+          <span class="page-heading__index">2026.06.02 // 8 min read</span>
+          <h1>关于前端体验的一些笔记</h1>
+          <p>一些关于界面节奏、状态反馈、排版和微交互的观察。</p>
+          <div class="article-item__tags"><span>Frontend</span><span>Design</span></div>
+        </header>
+        <div class="post-content">
+<p>前端体验不只是页面能不能打开，也包括用户在每一次点击、滚动、等待和阅读时的感受。</p>
+<h2>我会关注的细节</h2>
+<ul>
+<li>页面层级是否清楚。</li>
+<li>交互反馈是否及时。</li>
+<li>动效是否真的帮助理解，而不是增加负担。</li>
+<li>移动端文字和按钮是否仍然舒服。</li>
+</ul>
+<p>一个好的界面应该让人少猜一点，少等一点，也少被无关的视觉噪音打断。</p>
+        </div>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-bottom">
+        <p data-i18n="footer.copy">© 2026 maki. Built for notes, ideas, and experiments.</p>
+        <a href="../index.html" data-i18n="footer.back">回到首页</a>
+      </div>
+    </footer>
+
+    <script src="../script.js?v=6.0-content-system"></script>
+  </body>
+</html>

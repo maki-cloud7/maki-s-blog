@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>构建个人博客的第一周 - maki's blog</title>
+    <meta name="description" content="从信息架构、视觉方向和写作习惯开始，记录个人博客搭建的第一阶段。" />
+    <link rel="stylesheet" href="../styles.css?v=6.0-content-system" />
+  </head>
+  <body>
+    <div class="site-line" aria-hidden="true"></div>
+    <header class="site-header">
+      <div class="header-actions" aria-label="站点设置">
+        <button class="rotary-knob" type="button" aria-label="Scroll control" data-rotary-knob>
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle class="rotary-knob__outer" cx="32" cy="32" r="27" />
+            <circle class="rotary-knob__inner" cx="32" cy="32" r="18" />
+            <path class="rotary-knob__grip" d="M32 9v10M32 45v10M9 32h10M45 32h10M15.7 15.7l7 7M41.3 41.3l7 7M48.3 15.7l-7 7M22.7 41.3l-7 7" />
+            <path class="rotary-knob__indicator" d="M32 32V17" />
+          </svg>
+        </button>
+        <button class="utility-button" type="button" data-lang-toggle aria-label="Switch language">EN</button>
+        <button class="utility-button" type="button" data-theme-toggle aria-label="Toggle dark mode">Dark</button>
+      </div>
+      <a class="brand" href="../index.html" aria-label="maki blog home">maki</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+      </button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a class="nav-link" href="../index.html"><span data-i18n="nav.home">首页</span></a>
+        <a class="nav-link" href="../articles.html"><span data-i18n="nav.articles">文章</span></a>
+        <a class="nav-link" href="../projects.html"><span data-i18n="nav.projects">项目</span></a>
+        <a class="nav-link" href="../friends.html"><span data-i18n="nav.friends">友链</span></a>
+        <a class="nav-link" href="../guestbook.html"><span data-i18n="nav.guestbook">留言板</span></a>
+        <a class="nav-link" href="../about.html"><span data-i18n="nav.about">关于</span></a>
+      </nav>
+    </header>
+
+    <main class="page post-page inner-page">
+      <article class="post-shell">
+        <a class="post-back" href="../articles.html">← 返回文章列表</a>
+        <header class="post-header">
+          <span class="page-heading__index">2026.06.03 // 5 min read</span>
+          <h1>构建个人博客的第一周</h1>
+          <p>从信息架构、视觉方向和写作习惯开始，记录个人博客搭建的第一阶段。</p>
+          <div class="article-item__tags"><span>Design</span><span>Journal</span></div>
+        </header>
+        <div class="post-content">
+<p>这是个人博客开始搭建后的第一周记录。</p>
+<p>我先把网站当成一个长期项目来处理，而不是只做一个展示页面。首页负责建立第一印象，文章页负责沉淀内容，项目页放持续生长的作品，友链和关于页则保留一点个人空间的温度。</p>
+<h2>第一阶段的重点</h2>
+<ul>
+<li>先确定页面结构，而不是急着补满内容。</li>
+<li>保持视觉克制，让文字和导航足够清楚。</li>
+<li>把后续维护方式提前想好，避免每次发布都要大改 HTML。</li>
+</ul>
+<p>接下来会继续把写作流程做轻，让新增文章变成一件稳定、重复、低成本的事情。</p>
+        </div>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-bottom">
+        <p data-i18n="footer.copy">© 2026 maki. Built for notes, ideas, and experiments.</p>
+        <a href="../index.html" data-i18n="footer.back">回到首页</a>
+      </div>
+    </footer>
+
+    <script src="../script.js?v=6.0-content-system"></script>
+  </body>
+</html>

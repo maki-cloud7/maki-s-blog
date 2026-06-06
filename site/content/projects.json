@@ -1,0 +1,26 @@
+[
+  {
+    "id": "blog-system",
+    "title": "Blog System",
+    "tag": "system",
+    "summary": "一个用于整理文章、草稿和发布节奏的轻量博客系统。",
+    "meta": "writing flow / local first",
+    "url": "projects.html#blog-system"
+  },
+  {
+    "id": "design-notes",
+    "title": "Design Notes",
+    "tag": "writing",
+    "summary": "收集界面观察、组件细节和排版实验的小型笔记库。",
+    "meta": "interface notes / patterns",
+    "url": "projects.html#design-notes"
+  },
+  {
+    "id": "tiny-tools",
+    "title": "Tiny Tools",
+    "tag": "tools",
+    "summary": "一些解决日常小问题的脚本、页面和交互工具合集。",
+    "meta": "scripts / widgets / sketches",
+    "url": "projects.html#tiny-tools"
+  }
+]
