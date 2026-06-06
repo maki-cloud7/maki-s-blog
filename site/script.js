@@ -1631,6 +1631,12 @@ window.addEventListener("keydown", (event) => {
   hGroup.setAttribute("fill", "none");
   svg.appendChild(hGroup);
 
+  const signalGroup = document.createElementNS(NS, "g");
+  signalGroup.setAttribute("fill", "none");
+  signalGroup.setAttribute("stroke-linecap", "round");
+  signalGroup.setAttribute("stroke-linejoin", "round");
+  svg.appendChild(signalGroup);
+
   function isDark() {
     return document.documentElement.dataset.theme === "dark";
   }
@@ -1648,19 +1654,20 @@ window.addEventListener("keydown", (event) => {
       hLine.setAttribute("y1", y);
       hLine.setAttribute("x2", width);
       hLine.setAttribute("y2", y);
-      hLine.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.085)" : "rgba(16,16,16,0.07)");
+      hLine.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.032)" : "rgba(16,16,16,0.026)");
       hLine.setAttribute("stroke-width", "1");
       hGroup.appendChild(hLine);
     }
     lineGroup.textContent = "";
     glowGroup.textContent = "";
+    signalGroup.textContent = "";
     lines.length = 0;
     const count = Math.floor(width / GRID_SIZE) + 1;
     for (let i = 0; i < count; i++) {
       const x = i * GRID_SIZE;
       const line = document.createElementNS(NS, "path");
       line.setAttribute("d", `M ${x},0 L ${x},${height}`);
-      line.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.085)" : "rgba(16,16,16,0.07)");
+      line.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.032)" : "rgba(16,16,16,0.026)");
       line.setAttribute("stroke-width", "1");
       lineGroup.appendChild(line);
       const glowLine = document.createElementNS(NS, "path");
@@ -1678,6 +1685,42 @@ window.addEventListener("keydown", (event) => {
         glowEl: glowLine,
       });
     }
+
+    const signalColor = isDark() ? "rgba(255,55,55,0.42)" : "rgba(225,25,25,0.38)";
+    const mutedColor = isDark() ? "rgba(244,243,238,0.09)" : "rgba(16,16,16,0.075)";
+    const originX = width * 0.18;
+    const originY = height * 0.34;
+    const routes = [
+      `M ${originX},${originY} C ${width * 0.34},${height * 0.18} ${width * 0.5},${height * 0.18} ${width * 0.68},${height * 0.34} S ${width * 0.88},${height * 0.54} ${width * 1.04},${height * 0.42}`,
+      `M ${width * -0.04},${height * 0.72} C ${width * 0.18},${height * 0.66} ${width * 0.26},${height * 0.5} ${width * 0.42},${height * 0.54} S ${width * 0.72},${height * 0.78} ${width * 0.98},${height * 0.62}`,
+      `M ${width * 0.58},${height * -0.04} L ${width * 0.46},${height * 0.26} L ${width * 0.54},${height * 0.48} L ${width * 0.38},${height * 0.9}`,
+    ];
+
+    routes.forEach((route, index) => {
+      const routePath = document.createElementNS(NS, "path");
+      routePath.setAttribute("d", route);
+      routePath.setAttribute("stroke", index === 2 ? mutedColor : signalColor);
+      routePath.setAttribute("stroke-width", index === 1 ? "2" : "1.4");
+      routePath.setAttribute("stroke-dasharray", index === 2 ? "14 24" : "80 34 8 34");
+      routePath.setAttribute("opacity", index === 0 ? "0.78" : "0.56");
+      signalGroup.appendChild(routePath);
+    });
+
+    [
+      [originX, originY, 5],
+      [width * 0.42, height * 0.54, 4],
+      [width * 0.68, height * 0.34, 6],
+      [width * 0.54, height * 0.48, 4],
+    ].forEach(([cx, cy, radius]) => {
+      const node = document.createElementNS(NS, "circle");
+      node.setAttribute("cx", cx);
+      node.setAttribute("cy", cy);
+      node.setAttribute("r", radius);
+      node.setAttribute("fill", isDark() ? "#11110f" : "#f7f7f4");
+      node.setAttribute("stroke", signalColor);
+      node.setAttribute("stroke-width", "1.5");
+      signalGroup.appendChild(node);
+    });
   }
 
   function updateLinePath(line, bend) {
@@ -1693,14 +1736,14 @@ window.addEventListener("keydown", (event) => {
     if (Math.abs(bend) < 0.05 || mouseY < -100) {
       d = `M ${x},0 L ${x},${height}`;
       line.glowEl.setAttribute("stroke", "rgba(179,42,37,0)");
-      line.lineEl.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.085)" : "rgba(16,16,16,0.07)");
+      line.lineEl.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.032)" : "rgba(16,16,16,0.026)");
     } else {
       const cpX = x + bend;
       d = `M ${x},0 L ${x},${top} Q ${cpX},${mouseY} ${x},${bottom} L ${x},${height}`;
       const bendRatio = Math.min(1, Math.abs(bend) / MAX_BEND);
-      const glowAlpha = (bendRatio * 0.52).toFixed(3);
+      const glowAlpha = (bendRatio * 0.36).toFixed(3);
       line.glowEl.setAttribute("stroke", `rgba(179,42,37,${glowAlpha})`);
-      line.lineEl.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.14)" : "rgba(16,16,16,0.12)");
+      line.lineEl.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.072)" : "rgba(16,16,16,0.058)");
     }
     line.lineEl.setAttribute("d", d);
     line.glowEl.setAttribute("d", d);

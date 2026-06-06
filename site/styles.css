@@ -4930,3 +4930,78 @@ body.is-scrolling .hero::after {
   margin-inline: 8px;
   color: color-mix(in srgb, var(--color-muted) 58%, transparent);
 }
+
+/* v6.6 signal field polish */
+#grid-overlay {
+  mix-blend-mode: multiply;
+}
+
+:root[data-theme="dark"] #grid-overlay {
+  mix-blend-mode: screen;
+}
+
+.hero::before {
+  border-radius: 0;
+  border: 0;
+  background:
+    linear-gradient(112deg, transparent 0 34%, color-mix(in srgb, var(--color-accent) 18%, transparent) 34% calc(34% + 2px), transparent calc(34% + 2px)),
+    linear-gradient(148deg, transparent 0 57%, color-mix(in srgb, var(--color-text) 10%, transparent) 57% calc(57% + 1px), transparent calc(57% + 1px)),
+    radial-gradient(circle at 22% 36%, color-mix(in srgb, var(--color-accent) 72%, transparent) 0 4px, transparent 5px),
+    radial-gradient(circle at 63% 24%, color-mix(in srgb, var(--color-accent) 52%, transparent) 0 5px, transparent 6px),
+    radial-gradient(circle at 76% 62%, color-mix(in srgb, var(--color-text) 20%, transparent) 0 3px, transparent 4px);
+  opacity: calc(0.46 - var(--hero-scroll) * 0.18);
+}
+
+.hero::after {
+  background:
+    linear-gradient(100deg, transparent 0 23%, color-mix(in srgb, var(--color-accent) 22%, transparent) 23% calc(23% + 2px), transparent calc(23% + 2px) 58%, color-mix(in srgb, var(--color-text) 6%, transparent) 58% calc(58% + 1px), transparent calc(58% + 1px)),
+    radial-gradient(circle at 58% 42%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent 36%),
+    radial-gradient(circle at 18% 64%, color-mix(in srgb, var(--color-accent) 9%, transparent), transparent 28%);
+}
+
+.signal-field__ring {
+  border-color: color-mix(in srgb, var(--color-text) 8%, transparent);
+  background:
+    radial-gradient(circle, transparent 0 53%, color-mix(in srgb, var(--color-accent) 7%, transparent) 54% 57%, transparent 58%),
+    conic-gradient(from 116deg, transparent 0 10%, color-mix(in srgb, var(--color-accent) 48%, transparent) 10% 12%, transparent 12% 44%, color-mix(in srgb, var(--color-text) 12%, transparent) 44% 45%, transparent 45% 72%, color-mix(in srgb, var(--color-accent) 28%, transparent) 72% 73%, transparent 73%);
+  opacity: 0.56;
+}
+
+.signal-field__axis {
+  background: color-mix(in srgb, var(--color-text) 7%, transparent);
+}
+
+.inner-page {
+  --field-a: color-mix(in srgb, var(--color-text) 5%, transparent);
+  --field-b: color-mix(in srgb, var(--color-text) 2.5%, transparent);
+  --field-c: color-mix(in srgb, var(--color-accent) 22%, transparent);
+}
+
+.inner-page::before {
+  top: calc(var(--header-height) + clamp(34px, 7vw, 92px));
+  right: clamp(10px, 6vw, 104px);
+  width: clamp(230px, 32vw, 460px);
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(125deg, transparent 0 31%, var(--field-c) 31% calc(31% + 2px), transparent calc(31% + 2px)),
+    linear-gradient(35deg, transparent 0 62%, var(--field-a) 62% calc(62% + 1px), transparent calc(62% + 1px)),
+    radial-gradient(circle at 18% 30%, var(--field-c) 0 5px, transparent 6px),
+    radial-gradient(circle at 54% 54%, color-mix(in srgb, var(--color-accent) 36%, transparent) 0 4px, transparent 5px),
+    radial-gradient(circle at 78% 20%, color-mix(in srgb, var(--color-text) 14%, transparent) 0 3px, transparent 4px),
+    repeating-linear-gradient(125deg, transparent 0 34px, var(--field-b) 35px 36px, transparent 37px 92px);
+  opacity: 0.58;
+  transform:
+    rotate(calc(-8deg + var(--scroll-progress) * 10deg))
+    translate3d(calc(var(--scroll-progress) * -10px), calc(var(--scroll-progress) * 16px), 0);
+}
+
+.inner-page::after {
+  background:
+    linear-gradient(103deg, transparent 0 17%, var(--field-c) 17% calc(17% + 1px), transparent calc(17% + 1px) 64%, color-mix(in srgb, var(--color-accent) 13%, transparent) 64% calc(64% + 2px), transparent calc(64% + 2px)),
+    linear-gradient(151deg, transparent 0 46%, color-mix(in srgb, var(--color-text) 4%, transparent) 46% calc(46% + 1px), transparent calc(46% + 1px)),
+    radial-gradient(circle at 82% 22%, color-mix(in srgb, var(--color-accent) 22%, transparent) 0 4px, transparent 5px),
+    radial-gradient(circle at 14% 74%, color-mix(in srgb, var(--color-text) 9%, transparent) 0 3px, transparent 4px),
+    repeating-linear-gradient(90deg, transparent 0 96px, color-mix(in srgb, var(--color-text) 1.9%, transparent) 97px 98px, transparent 99px 180px);
+  opacity: 0.76;
+}
