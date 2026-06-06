@@ -45,6 +45,36 @@ The script updates:
 - `friends.html`
 - `posts/*.html`
 
+## Owner Inline Editor
+
+Article pages support a hidden owner-only editor. Visitors do not see an edit button.
+
+To sign in, open a post with `?login=1`, for example:
+
+```text
+/posts/2026-06-03-first-week.html?login=1
+```
+
+After GitHub approves the login, the article page checks `/api/me`. The edit button is inserted only when the signed-in account is allowed and has write access to the repository.
+
+Required Vercel environment variables:
+
+```text
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+SESSION_SECRET=
+GITHUB_OWNER=maki-cloud7
+GITHUB_REPO=maki-s-blog
+GITHUB_BRANCH=main
+ALLOWED_GITHUB_LOGIN=
+```
+
+Create the GitHub OAuth App callback URL as:
+
+```text
+https://maki-s-blog.vercel.app/api/auth/callback
+```
+
 ## Edit Tags
 
 Post tags are declared inside each Markdown file:

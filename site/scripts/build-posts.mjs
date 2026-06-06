@@ -113,19 +113,19 @@ function tagSlug(tag) {
 }
 
 function replaceBetween(source, name, replacement) {
-  const pattern = new RegExp(`(\\s*<!-- POSTS:${name}:START -->)[\\s\\S]*?(\\s*<!-- POSTS:${name}:END -->)`);
+  const pattern = new RegExp(`(\\s*<!-- POSTS:${name}:START -->)\\s*[\\s\\S]*?\\s*(<!-- POSTS:${name}:END -->)`);
   if (!pattern.test(source)) {
     throw new Error(`Missing POSTS:${name} markers`);
   }
-  return source.replace(pattern, `$1\n${replacement}\n$2`);
+  return source.replace(pattern, `$1\n${replacement}\n          $2`);
 }
 
 function replaceContentBetween(source, name, replacement) {
-  const pattern = new RegExp(`(\\s*<!-- CONTENT:${name}:START -->)[\\s\\S]*?(\\s*<!-- CONTENT:${name}:END -->)`);
+  const pattern = new RegExp(`(\\s*<!-- CONTENT:${name}:START -->)\\s*[\\s\\S]*?\\s*(<!-- CONTENT:${name}:END -->)`);
   if (!pattern.test(source)) {
     throw new Error(`Missing CONTENT:${name} markers`);
   }
-  return source.replace(pattern, `$1\n${replacement}\n$2`);
+  return source.replace(pattern, `$1\n${replacement}\n          $2`);
 }
 
 async function readJson(filePath, fallback = []) {
@@ -343,6 +343,7 @@ async function loadPosts() {
       .filter(Boolean);
 
     posts.push({
+      sourcePath: `site/content/posts/${file}`,
       title: data.title || slug,
       date: data.date || "1970-01-01",
       tags,
@@ -446,7 +447,7 @@ function renderPostPage(post, socials) {
     </header>
 
     <main class="page post-page inner-page">
-      <article class="post-shell">
+      <article class="post-shell" data-post-source="${escapeHtml(post.sourcePath)}">
         <a class="post-back" href="../articles.html">← 返回文章列表</a>
         <header class="post-header">
           <span class="page-heading__index">${formatDate(post.date)} // ${escapeHtml(post.readTime)}</span>

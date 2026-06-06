@@ -213,6 +213,7 @@ const railLinks = Array.from(document.querySelectorAll("[data-rail-link]"));
 const innerPage = document.querySelector(".inner-page");
 const spotlightCards = Array.from(document.querySelectorAll(".composition-card, .friend-card, .project-card, .profile-card, .article-item, .guestbook-panel, .guestbook-signal"));
 const localClock = document.querySelector("[data-local-clock]");
+const postShell = document.querySelector("[data-post-source]");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 let phraseIndex = 0;
@@ -236,6 +237,17 @@ let heroScrollHeight = hero?.offsetHeight || 1;
 let lastHeroScrollProgress = -1;
 let lastScrollProgress = -1;
 let lastKnobRotation = -1;
+let editorSession = null;
+let editorSource = null;
+let editorSha = null;
+
+function escapeHtml(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
 
 function updateHeroPointer(event) {
   if (!hero) {
@@ -665,6 +677,246 @@ function updateArticleFilters() {
   }
 }
 
+function parseMarkdownPost(source = "") {
+  const match = source.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  const data = {};
+
+  if (!match) {
+    return { data, body: source };
+  }
+
+  match[1].split("\n").forEach((line) => {
+    const index = line.indexOf(":");
+    if (index === -1) {
+      return;
+    }
+    const key = line.slice(0, index).trim();
+    const value = line.slice(index + 1).trim();
+    data[key] = value;
+  });
+
+  return { data, body: match[2].trim() };
+}
+
+function serializeMarkdownPost(data, body) {
+  const tags = String(data.tags || "")
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .join(", ");
+
+  return `---
+title: ${data.title || ""}
+date: ${data.date || ""}
+tags: ${tags}
+summary: ${data.summary || ""}
+readTime: ${data.readTime || "5 min read"}
+draft: ${data.draft === "true" ? "true" : "false"}
+---
+
+${String(body || "").trim()}
+`;
+}
+
+function markdownPreview(markdown = "") {
+  return markdown
+    .split(/\n{2,}/)
+    .map((block) => {
+      const text = block.trim();
+      if (!text) {
+        return "";
+      }
+      if (text.startsWith("## ")) {
+        return `<h2>${escapeHtml(text.slice(3))}</h2>`;
+      }
+      if (text.startsWith("### ")) {
+        return `<h3>${escapeHtml(text.slice(4))}</h3>`;
+      }
+      if (text.split("\n").every((line) => /^-\s+/.test(line))) {
+        return `<ul>${text.split("\n").map((line) => `<li>${escapeHtml(line.replace(/^-\s+/, ""))}</li>`).join("")}</ul>`;
+      }
+      return `<p>${escapeHtml(text).replace(/\n/g, "<br />")}</p>`;
+    })
+    .join("");
+}
+
+function setEditorStatus(panel, message, tone = "") {
+  const status = panel.querySelector("[data-editor-status]");
+  if (!status) {
+    return;
+  }
+  status.textContent = message;
+  status.dataset.tone = tone;
+}
+
+function collectEditorData(form) {
+  return {
+    title: form.elements.title.value.trim(),
+    date: form.elements.date.value.trim(),
+    tags: form.elements.tags.value.trim(),
+    summary: form.elements.summary.value.trim(),
+    readTime: form.elements.readTime.value.trim(),
+    draft: form.elements.draft.checked ? "true" : "false",
+  };
+}
+
+function renderEditorPanel(post) {
+  const { data, body } = parseMarkdownPost(post.content);
+  const panel = document.createElement("section");
+  panel.className = "post-editor";
+  panel.setAttribute("aria-label", "文章编辑器");
+  panel.innerHTML = `
+    <form class="post-editor__form" data-editor-form>
+      <div class="post-editor__top">
+        <span>owner editor</span>
+        <button class="post-editor__ghost" type="button" data-editor-close>Close</button>
+      </div>
+      <label>
+        <span>Title</span>
+        <input name="title" type="text" value="${escapeHtml(data.title || "")}" required />
+      </label>
+      <label>
+        <span>Summary</span>
+        <textarea name="summary" rows="3" required>${escapeHtml(data.summary || "")}</textarea>
+      </label>
+      <div class="post-editor__grid">
+        <label>
+          <span>Date</span>
+          <input name="date" type="date" value="${escapeHtml(data.date || "")}" required />
+        </label>
+        <label>
+          <span>Read time</span>
+          <input name="readTime" type="text" value="${escapeHtml(data.readTime || "5 min read")}" />
+        </label>
+      </div>
+      <label>
+        <span>Tags</span>
+        <input name="tags" type="text" value="${escapeHtml(data.tags || "")}" placeholder="Notes, Frontend, Journal" />
+      </label>
+      <label class="post-editor__check">
+        <input name="draft" type="checkbox" ${data.draft === "true" ? "checked" : ""} />
+        <span>Draft</span>
+      </label>
+      <label>
+        <span>Markdown</span>
+        <textarea name="body" rows="18" required>${escapeHtml(body || "")}</textarea>
+      </label>
+      <div class="post-editor__preview post-content" data-editor-preview hidden></div>
+      <div class="post-editor__actions">
+        <button class="post-editor__button" type="submit">Save to GitHub</button>
+        <button class="post-editor__ghost" type="button" data-editor-preview-toggle>Preview</button>
+        <span class="post-editor__status" data-editor-status></span>
+      </div>
+    </form>
+  `;
+
+  const form = panel.querySelector("[data-editor-form]");
+  const preview = panel.querySelector("[data-editor-preview]");
+
+  panel.querySelector("[data-editor-close]")?.addEventListener("click", () => panel.remove());
+  panel.querySelector("[data-editor-preview-toggle]")?.addEventListener("click", () => {
+    preview.hidden = !preview.hidden;
+    if (!preview.hidden) {
+      preview.innerHTML = markdownPreview(form.elements.body.value);
+    }
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    setEditorStatus(panel, "Saving...");
+    const content = serializeMarkdownPost(collectEditorData(form), form.elements.body.value);
+
+    try {
+      const response = await fetch("/api/post", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: postShell.dataset.postSource,
+          content,
+          sha: editorSha,
+          message: `Update post: ${form.elements.title.value.trim()}`,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Save failed");
+      }
+      setEditorStatus(panel, "Saved. Vercel will redeploy shortly.", "success");
+      editorSha = result.sha || editorSha;
+    } catch (error) {
+      setEditorStatus(panel, error.message, "error");
+    }
+  });
+
+  return panel;
+}
+
+async function openPostEditor() {
+  if (!postShell || postShell.querySelector(".post-editor")) {
+    return;
+  }
+
+  const toolbar = document.querySelector("[data-editor-toolbar]");
+  toolbar?.querySelector("button")?.setAttribute("disabled", "true");
+
+  try {
+    const response = await fetch(`/api/post?path=${encodeURIComponent(postShell.dataset.postSource)}`);
+    const post = await response.json();
+    if (!response.ok) {
+      throw new Error(post.error || "Could not load source post");
+    }
+    editorSource = post.content;
+    editorSha = post.sha;
+    postShell.insertBefore(renderEditorPanel(post), postShell.querySelector(".post-content"));
+  } catch (error) {
+    window.alert(error.message);
+  } finally {
+    toolbar?.querySelector("button")?.removeAttribute("disabled");
+  }
+}
+
+function renderOwnerToolbar(session) {
+  if (!postShell || document.querySelector("[data-editor-toolbar]")) {
+    return;
+  }
+
+  const toolbar = document.createElement("div");
+  toolbar.className = "owner-toolbar";
+  toolbar.dataset.editorToolbar = "true";
+  toolbar.innerHTML = `
+    <span>${escapeHtml(session.login)}</span>
+    <button type="button">Edit</button>
+    <a href="/api/auth/logout">Sign out</a>
+  `;
+  toolbar.querySelector("button")?.addEventListener("click", openPostEditor);
+  postShell.insertBefore(toolbar, postShell.querySelector(".post-back")?.nextSibling || postShell.firstChild);
+}
+
+async function initOwnerEditor() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has("login")) {
+    params.delete("login");
+    const query = params.toString();
+    const next = `${window.location.pathname}${query ? `?${query}` : ""}`;
+    window.location.href = `/api/auth/login?next=${encodeURIComponent(next || window.location.pathname)}`;
+    return;
+  }
+
+  if (!postShell) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/me");
+    editorSession = await response.json();
+    if (editorSession.authorized) {
+      renderOwnerToolbar(editorSession);
+    }
+  } catch {
+    editorSession = null;
+  }
+}
+
 document.querySelectorAll(".nav-link").forEach((link) => {
   const linkPath = new URL(link.getAttribute("href"), window.location.href).pathname;
   const currentPath = window.location.pathname.endsWith("/") ? `${window.location.pathname}index.html` : window.location.pathname;
@@ -728,6 +980,8 @@ clearArticles?.addEventListener("click", () => {
 
   updateArticleFilters();
 });
+
+initOwnerEditor();
 
 aboutCards.forEach((card) => {
   card.addEventListener("mousemove", (event) => {
