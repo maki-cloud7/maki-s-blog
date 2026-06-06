@@ -38,14 +38,22 @@ function parseFrontMatter(source, fileName) {
   }
 
   const data = {};
+  let currentListKey = "";
   match[1].split("\n").forEach((line) => {
+    const listMatch = line.match(/^\s*-\s+(.*)$/);
+    if (listMatch && currentListKey) {
+      data[currentListKey] = [...(Array.isArray(data[currentListKey]) ? data[currentListKey] : []), listMatch[1].trim()];
+      return;
+    }
+
     const index = line.indexOf(":");
     if (index === -1) {
       return;
     }
     const key = line.slice(0, index).trim();
     const value = line.slice(index + 1).trim();
-    data[key] = value;
+    currentListKey = value ? "" : key;
+    data[key] = value || [];
   });
 
   return { data, body: match[2].trim() };
@@ -105,7 +113,23 @@ function formatInline(value) {
 }
 
 function formatDate(date) {
-  return date.replaceAll("-", ".");
+  return String(date).slice(0, 10).replaceAll("-", ".");
+}
+
+function formatDateTime(date) {
+  const value = String(date || "");
+  const [datePart, timePart = "00:00"] = value.replace("T", " ").split(/\s+/);
+  return `${formatDate(datePart)} ${timePart.slice(0, 5)}`;
+}
+
+function normalizeTags(value) {
+  if (Array.isArray(value)) {
+    return value.map((tag) => String(tag).trim()).filter(Boolean);
+  }
+  return String(value || "")
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
 }
 
 function tagSlug(tag) {
@@ -176,7 +200,9 @@ function renderFooterSocial(socials) {
 ${socials.map((social) => {
   const url = normalizeUrl(social.url);
   const externalAttrs = isExternalUrl(url) ? ' target="_blank" rel="noopener noreferrer"' : "";
-  return `        <a href="${escapeHtml(url)}"${externalAttrs} class="social-link"><span class="social-label">${escapeHtml(social.label)}</span></a>`;
+  const label = escapeHtml(social.label);
+  const iconText = /github/i.test(`${social.label} ${social.url}`) ? "GH" : /bilibili|哔哩/i.test(`${social.label} ${social.url}`) ? "B" : label.slice(0, 2).toUpperCase();
+  return `        <a href="${escapeHtml(url)}"${externalAttrs} class="social-link" aria-label="${label}" title="${label}"><span class="social-icon" aria-hidden="true">${escapeHtml(iconText)}</span><span class="social-label">${label}</span></a>`;
 }).join("\n")}
       </div>`;
 }
@@ -218,34 +244,36 @@ function renderGuestbookPage(html) {
     .replace(
     /<section class="page-panel" id="guestbook-panel"[\s\S]*?<\/section>\s*<\/main>/,
     `<section class="page-panel" id="guestbook-panel" aria-label="留言板" data-page-section>
-        <div class="guestbook-layout guestbook-layout--comments">
-          <aside class="guestbook-signal" aria-hidden="true">
-            <span>public channel</span>
-            <strong>notes, visible to everyone.</strong>
-            <div class="guestbook-signal__rows">
-              <span>github</span>
-              <span>issues</span>
-              <span>public</span>
+        <div class="guestbook-stack">
+          <div class="guestbook-layout guestbook-layout--comments">
+            <aside class="guestbook-signal" aria-hidden="true">
+              <span>public channel</span>
+              <strong>notes, visible to everyone.</strong>
+              <div class="guestbook-signal__rows">
+                <span>github</span>
+                <span>issues</span>
+                <span>public</span>
+              </div>
+            </aside>
+            <div class="guestbook-panel guestbook-panel--comments">
+              <section class="guestbook-panel__intro" aria-labelledby="guestbook-compose-title">
+                <span>public comments</span>
+                <h2 id="guestbook-compose-title" data-i18n="guestbook.panel.title">留言板 / Guestbook</h2>
+                <p>这里使用 GitHub Issues 保存留言。登录 GitHub 后即可留言，所有访客都能看到。</p>
+              </section>
             </div>
-          </aside>
-          <div class="guestbook-panel guestbook-panel--comments">
-            <section class="guestbook-panel__intro" aria-labelledby="guestbook-compose-title">
-              <span>public comments</span>
-              <h2 id="guestbook-compose-title" data-i18n="guestbook.panel.title">留言板 / Guestbook</h2>
-              <p>这里使用 GitHub Issues 保存留言。登录 GitHub 后即可留言，所有访客都能看到。</p>
-            </section>
-            <section class="guestbook-comments" aria-label="公开留言">
-              <script
-                src="https://utteranc.es/client.js"
-                repo="maki-cloud7/maki-s-blog"
-                issue-term="pathname"
-                label="guestbook"
-                theme="github-light"
-                crossorigin="anonymous"
-                async>
-              </script>
-            </section>
           </div>
+          <section class="guestbook-comments" aria-label="公开留言">
+            <script
+              src="https://utteranc.es/client.js"
+              repo="maki-cloud7/maki-s-blog"
+              issue-term="pathname"
+              label="guestbook"
+              theme="github-light"
+              crossorigin="anonymous"
+              async>
+            </script>
+          </section>
         </div>
       </section>
     </main>`,
@@ -337,10 +365,7 @@ async function loadPosts() {
     }
 
     const slug = data.slug ? slugify(data.slug) : slugify(file);
-    const tags = (data.tags || "")
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter(Boolean);
+    const tags = normalizeTags(data.tags);
 
     posts.push({
       sourcePath: `site/content/posts/${file}`,
@@ -393,7 +418,10 @@ function renderArchiveItems(posts) {
             <span class="article-item__number">${number}</span>
             <span class="article-item__content">
               <span class="article-item__title">${escapeHtml(post.title)}</span>
-              <span class="article-item__meta">${escapeHtml(post.tags.join(" · "))} · ${escapeHtml(post.readTime)}</span>
+              <span class="article-item__meta">
+                <span>${escapeHtml(formatDateTime(post.date))}</span>
+                <span>${escapeHtml(post.readTime)}</span>
+              </span>
               <span class="article-item__summary">${escapeHtml(post.summary)}</span>
               <span class="article-item__tags">
 ${post.tags.map((tag) => `                <span>${escapeHtml(tag)}</span>`).join("\n")}
@@ -450,7 +478,16 @@ function renderPostPage(post, socials) {
       <article class="post-shell" data-post-source="${escapeHtml(post.sourcePath)}">
         <a class="post-back" href="../articles.html">← 返回文章列表</a>
         <header class="post-header">
-          <span class="page-heading__index">${formatDate(post.date)} // ${escapeHtml(post.readTime)}</span>
+          <div class="post-meta-panel" aria-label="文章信息">
+            <span>
+              <small>published</small>
+              <strong>${escapeHtml(formatDateTime(post.date))}</strong>
+            </span>
+            <span>
+              <small>reading time</small>
+              <strong>${escapeHtml(post.readTime)}</strong>
+            </span>
+          </div>
           <h1>${escapeHtml(post.title)}</h1>
           <p>${escapeHtml(post.summary)}</p>
           <div class="article-item__tags">${tags}</div>

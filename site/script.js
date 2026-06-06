@@ -687,17 +687,32 @@ function parseMarkdownPost(source = "") {
     return { data, body: source };
   }
 
+  let currentListKey = "";
   match[1].split("\n").forEach((line) => {
+    const listMatch = line.match(/^\s*-\s+(.*)$/);
+    if (listMatch && currentListKey) {
+      data[currentListKey] = [...(Array.isArray(data[currentListKey]) ? data[currentListKey] : []), listMatch[1].trim()];
+      return;
+    }
+
     const index = line.indexOf(":");
     if (index === -1) {
       return;
     }
     const key = line.slice(0, index).trim();
     const value = line.slice(index + 1).trim();
-    data[key] = value;
+    currentListKey = value ? "" : key;
+    data[key] = value || [];
   });
 
   return { data, body: match[2].trim() };
+}
+
+function normalizeTagField(value) {
+  if (Array.isArray(value)) {
+    return value.join(", ");
+  }
+  return value || "";
 }
 
 function serializeMarkdownPost(data, body) {
@@ -709,7 +724,7 @@ function serializeMarkdownPost(data, body) {
 
   return `---
 title: ${data.title || ""}
-date: ${data.date || ""}
+date: ${(data.date || "").replace("T", " ")}
 tags: ${tags}
 summary: ${data.summary || ""}
 readTime: ${data.readTime || "5 min read"}
@@ -733,9 +748,26 @@ function todayIsoDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function nowLocalMinute() {
+  const now = new Date();
+  const offset = now.getTimezoneOffset();
+  return new Date(now.getTime() - offset * 60000).toISOString().slice(0, 16);
+}
+
+function normalizeDateTimeInput(value = "") {
+  const text = String(value || "").trim();
+  if (!text) {
+    return nowLocalMinute();
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+    return `${text}T00:00`;
+  }
+  return text.replace(" ", "T").slice(0, 16);
+}
+
 function buildNewPostPath(form) {
   const data = collectEditorData(form);
-  const date = data.date || todayIsoDate();
+  const date = (data.date || todayIsoDate()).slice(0, 10);
   return `site/content/posts/${date}-${slugifyPost(data.title)}.md`;
 }
 
@@ -809,7 +841,7 @@ function renderEditorPanel(post, options = {}) {
       <div class="post-editor__grid">
         <label>
           <span>Date</span>
-          <input name="date" type="date" value="${escapeHtml(data.date || todayIsoDate())}" required />
+          <input name="date" type="datetime-local" value="${escapeHtml(normalizeDateTimeInput(data.date))}" required />
         </label>
         <label>
           <span>Read time</span>
@@ -818,7 +850,7 @@ function renderEditorPanel(post, options = {}) {
       </div>
       <label>
         <span>Tags</span>
-        <input name="tags" type="text" value="${escapeHtml(data.tags || "")}" placeholder="Notes, Frontend, Journal" />
+        <input name="tags" type="text" value="${escapeHtml(normalizeTagField(data.tags))}" placeholder="Notes, Frontend, Journal" />
       </label>
       <label class="post-editor__check">
         <input name="draft" type="checkbox" ${data.draft === "true" ? "checked" : ""} />
@@ -906,7 +938,7 @@ async function openPostEditor() {
 function emptyPostSource() {
   return `---
 title: 
-date: ${todayIsoDate()}
+date: ${nowLocalMinute().replace("T", " ")}
 tags: Notes
 summary: 
 readTime: 5 min read

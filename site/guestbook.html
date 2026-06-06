@@ -61,42 +61,44 @@
       </section>
 
       <section class="page-panel" id="guestbook-panel" aria-label="留言板" data-page-section>
-        <div class="guestbook-layout guestbook-layout--comments">
-          <aside class="guestbook-signal" aria-hidden="true">
-            <span>public channel</span>
-            <strong>notes, visible to everyone.</strong>
-            <div class="guestbook-signal__rows">
-              <span>github</span>
-              <span>issues</span>
-              <span>public</span>
+        <div class="guestbook-stack">
+          <div class="guestbook-layout guestbook-layout--comments">
+            <aside class="guestbook-signal" aria-hidden="true">
+              <span>public channel</span>
+              <strong>notes, visible to everyone.</strong>
+              <div class="guestbook-signal__rows">
+                <span>github</span>
+                <span>issues</span>
+                <span>public</span>
+              </div>
+            </aside>
+            <div class="guestbook-panel guestbook-panel--comments">
+              <section class="guestbook-panel__intro" aria-labelledby="guestbook-compose-title">
+                <span>public comments</span>
+                <h2 id="guestbook-compose-title" data-i18n="guestbook.panel.title">留言板 / Guestbook</h2>
+                <p>这里使用 GitHub Issues 保存留言。登录 GitHub 后即可留言，所有访客都能看到。</p>
+              </section>
             </div>
-          </aside>
-          <div class="guestbook-panel guestbook-panel--comments">
-            <section class="guestbook-panel__intro" aria-labelledby="guestbook-compose-title">
-              <span>public comments</span>
-              <h2 id="guestbook-compose-title" data-i18n="guestbook.panel.title">留言板 / Guestbook</h2>
-              <p>这里使用 GitHub Issues 保存留言。登录 GitHub 后即可留言，所有访客都能看到。</p>
-            </section>
-            <section class="guestbook-comments" aria-label="公开留言">
-              <script
-                src="https://utteranc.es/client.js"
-                repo="maki-cloud7/maki-s-blog"
-                issue-term="pathname"
-                label="guestbook"
-                theme="github-light"
-                crossorigin="anonymous"
-                async>
-              </script>
-            </section>
           </div>
+          <section class="guestbook-comments" aria-label="公开留言">
+            <script
+              src="https://utteranc.es/client.js"
+              repo="maki-cloud7/maki-s-blog"
+              issue-term="pathname"
+              label="guestbook"
+              theme="github-light"
+              crossorigin="anonymous"
+              async>
+            </script>
+          </section>
         </div>
       </section>
     </main>
 
     <footer class="site-footer">
       <div class="footer-social">
-        <a href="https://space.bilibili.com/2140415206?spm_id_from=333.1007.0.0" target="_blank" rel="noopener noreferrer" class="social-link"><span class="social-label">哔哩哔哩</span></a>
-        <a href="https://github.com/maki-cloud7" target="_blank" rel="noopener noreferrer" class="social-link"><span class="social-label">GitHub</span></a>
+        <a href="https://space.bilibili.com/2140415206?spm_id_from=333.1007.0.0" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="哔哩哔哩" title="哔哩哔哩"><span class="social-icon" aria-hidden="true">B</span><span class="social-label">哔哩哔哩</span></a>
+        <a href="https://github.com/maki-cloud7" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="GitHub" title="GitHub"><span class="social-icon" aria-hidden="true">GH</span><span class="social-label">GitHub</span></a>
       </div>
       <div class="footer-bottom">
         <p data-i18n="footer.copy">© 2026 maki. Built for notes, ideas, and experiments.</p>
