@@ -504,22 +504,11 @@ function renderPostPage(post, socials) {
       <article class="post-shell" data-post-source="${escapeHtml(post.sourcePath)}">
         <a class="post-back" href="../articles.html">← 返回文章列表</a>
         <header class="post-header">
+          <span class="page-heading__index post-meta-line">${escapeHtml(formatDateTime(post.date))} // ${escapeHtml(post.readTime)}</span>
           <h1>${escapeHtml(post.title)}</h1>
-        </header>
-        <section class="post-deck" aria-label="文章摘要">
           <p>${escapeHtml(post.summary)}</p>
-          <div class="post-meta-panel" aria-label="文章信息">
-            <span>
-              <small>published</small>
-              <strong>${escapeHtml(formatDateTime(post.date))}</strong>
-            </span>
-            <span>
-              <small>reading time</small>
-              <strong>${escapeHtml(post.readTime)}</strong>
-            </span>
-          </div>
           <div class="article-item__tags">${tags}</div>
-        </section>
+        </header>
         <div class="post-content">
 ${post.bodyHtml}
         </div>

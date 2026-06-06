@@ -4376,64 +4376,6 @@ body.is-scrolling .hero::after {
   display: block;
 }
 
-.post-deck {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
-  gap: clamp(18px, 4vw, 42px);
-  align-items: start;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent);
-  padding: clamp(18px, 3vw, 34px) 0 clamp(24px, 4vw, 42px);
-}
-
-.post-deck > p {
-  max-width: 680px;
-  margin: 0;
-  color: var(--color-muted);
-  font-size: clamp(18px, 2vw, 22px);
-  line-height: 1.7;
-}
-
-.post-deck .article-item__tags {
-  grid-column: 1;
-  margin-top: -8px;
-}
-
-.post-meta-panel {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  display: grid;
-  gap: 0;
-  border-block: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent);
-}
-
-.post-meta-panel span {
-  display: grid;
-  gap: 6px;
-  padding: 16px 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
-}
-
-.post-meta-panel span:last-child {
-  border-bottom: 0;
-}
-
-.post-meta-panel small {
-  color: var(--color-accent);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 850;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.post-meta-panel strong {
-  color: var(--color-text);
-  font-family: var(--font-mono);
-  font-size: clamp(16px, 1.8vw, 22px);
-  font-weight: 850;
-  letter-spacing: 0;
-}
-
 .post-content {
   max-width: 760px;
   margin-inline: auto;
@@ -4541,25 +4483,6 @@ body.is-scrolling .hero::after {
 }
 
 @media (max-width: 780px) {
-  .post-deck {
-    grid-template-columns: 1fr;
-  }
-
-  .post-meta-panel {
-    grid-column: 1;
-    grid-row: auto;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .post-meta-panel span {
-    border-bottom: 0;
-  }
-
-  .post-meta-panel span + span {
-    border-left: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
-    padding-left: 14px;
-  }
-
   .guestbook-stack .guestbook-layout {
     grid-template-columns: 1fr;
   }
@@ -4568,4 +4491,23 @@ body.is-scrolling .hero::after {
   .guestbook-stack .guestbook-panel__intro {
     min-height: 0;
   }
+}
+
+/* v6.5 restore compact post header */
+.post-header {
+  display: block;
+}
+
+.post-meta-line {
+  display: inline-flex;
+  margin-bottom: 2px;
+  color: var(--color-muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+  letter-spacing: 0.07em;
+}
+
+.post-meta-line::before {
+  content: "posted";
+  color: var(--color-accent);
 }
