@@ -325,9 +325,9 @@ function renderGuestbookPage(html) {
               class="giscus-slot"
               data-giscus-comments
               data-repo="maki-cloud7/maki-s-blog"
-              data-repo-id="REPLACE_WITH_GISCUS_REPO_ID"
-              data-category="Announcements"
-              data-category-id="REPLACE_WITH_GISCUS_CATEGORY_ID"
+              data-repo-id="R_kgDOSyizVA"
+              data-category="General"
+              data-category-id="DIC_kwDOSyizVM4C-orT"
             ></div>
           </section>
         </div>
@@ -586,9 +586,9 @@ ${post.bodyHtml}
             class="giscus-slot"
             data-giscus-comments
             data-repo="maki-cloud7/maki-s-blog"
-            data-repo-id="REPLACE_WITH_GISCUS_REPO_ID"
-            data-category="Announcements"
-            data-category-id="REPLACE_WITH_GISCUS_CATEGORY_ID"
+            data-repo-id="R_kgDOSyizVA"
+            data-category="General"
+            data-category-id="DIC_kwDOSyizVM4C-orT"
           ></div>
         </section>
       </article>
