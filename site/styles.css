@@ -4540,6 +4540,26 @@ body.is-scrolling .hero::after {
   line-height: 1.78;
 }
 
+.guestbook-brief__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: clamp(12px, 2vw, 18px);
+}
+
+.guestbook-brief__meta span {
+  border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-bg) 54%, transparent);
+  padding: 7px 10px;
+  color: color-mix(in srgb, var(--color-text) 66%, transparent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 760;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .guestbook-protocol {
   display: grid;
   align-content: start;
