@@ -47,17 +47,34 @@
     </header>
 
     <main class="page post-page inner-page">
+      <nav class="page-rail post-rail" aria-label="文章目录" data-post-toc>
+        <a href="#post-title" data-rail-link>00 / title</a>
+      </nav>
       <article class="post-shell" data-post-source="site/content/posts/2026-06-02-frontend-notes.md">
         <a class="post-back" href="../articles.html">← 返回文章列表</a>
         <header class="post-header">
           <span class="page-heading__index post-meta-line">2026.06.02 00:00 // 8 min read</span>
-          <h1>关于前端体验的一些笔记</h1>
+          <h1 id="post-title">关于前端体验的一些笔记</h1>
           <p>一些关于界面节奏、状态反馈、排版和微交互的观察。</p>
           <div class="article-item__tags"><span>Frontend</span><span>Design</span></div>
+          <dl class="post-stats" aria-label="文章统计">
+            <div>
+              <dt>Words</dt>
+              <dd data-post-word-count>--</dd>
+            </div>
+            <div>
+              <dt>Read</dt>
+              <dd data-post-read-time>--</dd>
+            </div>
+            <div>
+              <dt>Views</dt>
+              <dd><span id="busuanzi_value_page_pv">--</span></dd>
+            </div>
+          </dl>
         </header>
         <div class="post-content">
 <p>前端体验不只是页面能不能打开，也包括用户在每一次点击、滚动、等待和阅读时的感受。</p>
-<h2>我会关注的细节</h2>
+<h2 id="我会关注的细节">我会关注的细节</h2>
 <ul>
 <li>页面层级是否清楚。</li>
 <li>交互反馈是否及时。</li>
@@ -66,6 +83,20 @@
 </ul>
 <p>一个好的界面应该让人少猜一点，少等一点，也少被无关的视觉噪音打断。</p>
         </div>
+        <section class="post-comments" id="comments" aria-label="评论与回应">
+          <div class="post-comments__head">
+            <span>comments</span>
+            <h2>评论与回应</h2>
+          </div>
+          <div
+            class="giscus-slot"
+            data-giscus-comments
+            data-repo="maki-cloud7/maki-s-blog"
+            data-repo-id="REPLACE_WITH_GISCUS_REPO_ID"
+            data-category="Announcements"
+            data-category-id="REPLACE_WITH_GISCUS_CATEGORY_ID"
+          ></div>
+        </section>
       </article>
     </main>
 
@@ -88,5 +119,6 @@
     </footer>
 
     <script src="../script.js?v=6.0-content-system"></script>
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
   </body>
 </html>

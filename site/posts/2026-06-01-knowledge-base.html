@@ -47,17 +47,34 @@
     </header>
 
     <main class="page post-page inner-page">
+      <nav class="page-rail post-rail" aria-label="文章目录" data-post-toc>
+        <a href="#post-title" data-rail-link>00 / title</a>
+      </nav>
       <article class="post-shell" data-post-source="site/content/posts/2026-06-01-knowledge-base.md">
         <a class="post-back" href="../articles.html">← 返回文章列表</a>
         <header class="post-header">
           <span class="page-heading__index post-meta-line">2026.06.01 00:00 // 6 min read</span>
-          <h1>我如何整理自己的知识库</h1>
+          <h1 id="post-title">我如何整理自己的知识库</h1>
           <p>把碎片信息变成可回访、可连接、可持续维护的个人知识系统。</p>
           <div class="article-item__tags"><span>Notes</span><span>Workflow</span></div>
+          <dl class="post-stats" aria-label="文章统计">
+            <div>
+              <dt>Words</dt>
+              <dd data-post-word-count>--</dd>
+            </div>
+            <div>
+              <dt>Read</dt>
+              <dd data-post-read-time>--</dd>
+            </div>
+            <div>
+              <dt>Views</dt>
+              <dd><span id="busuanzi_value_page_pv">--</span></dd>
+            </div>
+          </dl>
         </header>
         <div class="post-content">
 <p>知识库最重要的不是装下所有东西，而是让重要的内容能够被再次找到。</p>
-<h2>我的整理原则</h2>
+<h2 id="我的整理原则">我的整理原则</h2>
 <ul>
 <li>临时信息先快速记录，不在入口处追求完美。</li>
 <li>有复用价值的内容再整理成结构化笔记。</li>
@@ -66,6 +83,20 @@
 </ul>
 <p>我希望这个博客也能成为知识库的一部分：公开、可回访，也能随着项目一起更新。</p>
         </div>
+        <section class="post-comments" id="comments" aria-label="评论与回应">
+          <div class="post-comments__head">
+            <span>comments</span>
+            <h2>评论与回应</h2>
+          </div>
+          <div
+            class="giscus-slot"
+            data-giscus-comments
+            data-repo="maki-cloud7/maki-s-blog"
+            data-repo-id="REPLACE_WITH_GISCUS_REPO_ID"
+            data-category="Announcements"
+            data-category-id="REPLACE_WITH_GISCUS_CATEGORY_ID"
+          ></div>
+        </section>
       </article>
     </main>
 
@@ -88,5 +119,6 @@
     </footer>
 
     <script src="../script.js?v=6.0-content-system"></script>
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
   </body>
 </html>

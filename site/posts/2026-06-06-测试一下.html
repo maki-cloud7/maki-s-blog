@@ -47,17 +47,48 @@
     </header>
 
     <main class="page post-page inner-page">
+      <nav class="page-rail post-rail" aria-label="文章目录" data-post-toc>
+        <a href="#post-title" data-rail-link>00 / title</a>
+      </nav>
       <article class="post-shell" data-post-source="site/content/posts/2026-06-06-测试一下.md">
         <a class="post-back" href="../articles.html">← 返回文章列表</a>
         <header class="post-header">
           <span class="page-heading__index post-meta-line">2026.06.06 00:00 // 5 min read</span>
-          <h1>测试一下</h1>
+          <h1 id="post-title">测试一下</h1>
           <p>大概就是这样测试一下摘要</p>
           <div class="article-item__tags"><span>测试</span></div>
+          <dl class="post-stats" aria-label="文章统计">
+            <div>
+              <dt>Words</dt>
+              <dd data-post-word-count>--</dd>
+            </div>
+            <div>
+              <dt>Read</dt>
+              <dd data-post-read-time>--</dd>
+            </div>
+            <div>
+              <dt>Views</dt>
+              <dd><span id="busuanzi_value_page_pv">--</span></dd>
+            </div>
+          </dl>
         </header>
         <div class="post-content">
 <p>Start writing here.只是测试一下而已</p>
         </div>
+        <section class="post-comments" id="comments" aria-label="评论与回应">
+          <div class="post-comments__head">
+            <span>comments</span>
+            <h2>评论与回应</h2>
+          </div>
+          <div
+            class="giscus-slot"
+            data-giscus-comments
+            data-repo="maki-cloud7/maki-s-blog"
+            data-repo-id="REPLACE_WITH_GISCUS_REPO_ID"
+            data-category="Announcements"
+            data-category-id="REPLACE_WITH_GISCUS_CATEGORY_ID"
+          ></div>
+        </section>
       </article>
     </main>
 
@@ -80,5 +111,6 @@
     </footer>
 
     <script src="../script.js?v=6.0-content-system"></script>
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
   </body>
 </html>

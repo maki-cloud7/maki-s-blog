@@ -47,18 +47,35 @@
     </header>
 
     <main class="page post-page inner-page">
+      <nav class="page-rail post-rail" aria-label="文章目录" data-post-toc>
+        <a href="#post-title" data-rail-link>00 / title</a>
+      </nav>
       <article class="post-shell" data-post-source="site/content/posts/2026-06-03-first-week.md">
         <a class="post-back" href="../articles.html">← 返回文章列表</a>
         <header class="post-header">
           <span class="page-heading__index post-meta-line">2026.06.03 00:00 // 5 min read</span>
-          <h1>构建个人博客的第一周</h1>
+          <h1 id="post-title">构建个人博客的第一周</h1>
           <p>从信息架构、视觉方向和写作习惯开始，记录个人博客搭建的第一阶段。</p>
           <div class="article-item__tags"><span>Design</span><span>Journal</span></div>
+          <dl class="post-stats" aria-label="文章统计">
+            <div>
+              <dt>Words</dt>
+              <dd data-post-word-count>--</dd>
+            </div>
+            <div>
+              <dt>Read</dt>
+              <dd data-post-read-time>--</dd>
+            </div>
+            <div>
+              <dt>Views</dt>
+              <dd><span id="busuanzi_value_page_pv">--</span></dd>
+            </div>
+          </dl>
         </header>
         <div class="post-content">
 <p>这是个人博客开始搭建后的第一周记录。</p>
 <p>我先把网站当成一个长期项目来处理，而不是只做一个展示页面。首页负责建立第一印象，文章页负责沉淀内容，项目页放持续生长的作品，友链和关于页则保留一点个人空间的温度。</p>
-<h2>第一阶段的重点</h2>
+<h2 id="第一阶段的重点">第一阶段的重点</h2>
 <ul>
 <li>先确定页面结构，而不是急着补满内容。</li>
 <li>保持视觉克制，让文字和导航足够清楚。</li>
@@ -66,6 +83,20 @@
 </ul>
 <p>接下来会继续把写作流程做轻，让新增文章变成一件稳定、重复、低成本的事情。</p>
         </div>
+        <section class="post-comments" id="comments" aria-label="评论与回应">
+          <div class="post-comments__head">
+            <span>comments</span>
+            <h2>评论与回应</h2>
+          </div>
+          <div
+            class="giscus-slot"
+            data-giscus-comments
+            data-repo="maki-cloud7/maki-s-blog"
+            data-repo-id="REPLACE_WITH_GISCUS_REPO_ID"
+            data-category="Announcements"
+            data-category-id="REPLACE_WITH_GISCUS_CATEGORY_ID"
+          ></div>
+        </section>
       </article>
     </main>
 
@@ -88,5 +119,6 @@
     </footer>
 
     <script src="../script.js?v=6.0-content-system"></script>
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
   </body>
 </html>

@@ -63,6 +63,7 @@ function markdownToHtml(markdown) {
   const blocks = markdown.split(/\n{2,}/);
   const html = [];
   let inList = false;
+  const headingIds = new Map();
 
   function closeList() {
     if (inList) {
@@ -71,7 +72,31 @@ function markdownToHtml(markdown) {
     }
   }
 
+  function uniqueHeadingId(value) {
+    const base = slugify(value.replace(/[`*_#[\]()]/g, "")) || "section";
+    const count = headingIds.get(base) || 0;
+    headingIds.set(base, count + 1);
+    return count ? `${base}-${count + 1}` : base;
+  }
+
+  function renderCodeBlock(block) {
+    const match = block.match(/^```(\S+)?\n([\s\S]*?)\n?```$/);
+    if (!match) {
+      return null;
+    }
+
+    const language = match[1] || "text";
+    return `<pre data-code-block data-language="${escapeHtml(language)}"><code>${escapeHtml(match[2])}</code></pre>`;
+  }
+
   blocks.forEach((block) => {
+    const codeBlock = renderCodeBlock(block.trim());
+    if (codeBlock) {
+      closeList();
+      html.push(codeBlock);
+      return;
+    }
+
     const lines = block.split("\n");
     if (lines.every((line) => /^-\s+/.test(line))) {
       if (!inList) {
@@ -90,11 +115,14 @@ function markdownToHtml(markdown) {
       return;
     }
     if (text.startsWith("### ")) {
-      html.push(`<h3>${formatInline(text.slice(4))}</h3>`);
+      const heading = text.slice(4);
+      html.push(`<h3 id="${uniqueHeadingId(heading)}">${formatInline(heading)}</h3>`);
     } else if (text.startsWith("## ")) {
-      html.push(`<h2>${formatInline(text.slice(3))}</h2>`);
+      const heading = text.slice(3);
+      html.push(`<h2 id="${uniqueHeadingId(heading)}">${formatInline(heading)}</h2>`);
     } else if (text.startsWith("# ")) {
-      html.push(`<h2>${formatInline(text.slice(2))}</h2>`);
+      const heading = text.slice(2);
+      html.push(`<h2 id="${uniqueHeadingId(heading)}">${formatInline(heading)}</h2>`);
     } else {
       html.push(`<p>${formatInline(text.replace(/\n/g, "<br />"))}</p>`);
     }
@@ -289,19 +317,18 @@ function renderGuestbookPage(html) {
             </div>
           </aside>
           <div class="guestbook-divider" aria-hidden="true">
-            <span>utterances</span>
-            <span>github issues</span>
+            <span>giscus</span>
+            <span>github discussions</span>
           </div>
           <section class="guestbook-comments" aria-label="公开留言">
-            <script
-              src="https://utteranc.es/client.js"
-              repo="maki-cloud7/maki-s-blog"
-              issue-term="pathname"
-              label="guestbook"
-              theme="github-light"
-              crossorigin="anonymous"
-              async>
-            </script>
+            <div
+              class="giscus-slot"
+              data-giscus-comments
+              data-repo="maki-cloud7/maki-s-blog"
+              data-repo-id="REPLACE_WITH_GISCUS_REPO_ID"
+              data-category="Announcements"
+              data-category-id="REPLACE_WITH_GISCUS_CATEGORY_ID"
+            ></div>
           </section>
         </div>
       </section>
@@ -433,14 +460,30 @@ function renderTagButtons(posts) {
 }
 
 function renderArchiveItems(posts) {
-  return posts.map((post, index) => {
+  const postsByYear = new Map();
+  posts.forEach((post, index) => {
+    const year = String(post.date).slice(0, 4) || "Archive";
+    if (!postsByYear.has(year)) {
+      postsByYear.set(year, []);
+    }
+    postsByYear.get(year).push({ post, index });
+  });
+
+  return [...postsByYear.entries()].map(([year, entries], yearIndex) => `          <details class="archive-year" data-archive-year ${yearIndex === 0 ? "open" : ""}>
+            <summary>
+              <span>${escapeHtml(year)}</span>
+              <small>${entries.length} ${entries.length === 1 ? "post" : "posts"}</small>
+            </summary>
+            <div class="archive-year__list">
+${entries.map(({ post, index }) => {
     const number = String(index + 1).padStart(3, "0");
     const tagSlugs = post.tags.map(tagSlug).join(" ");
-    return `          <a
+    return `              <a
             class="article-item"
             href="${post.url}"
             id="article-${number}"
             data-article
+            data-article-year="${escapeHtml(year)}"
             data-tags="${escapeHtml(tagSlugs)}"
             data-search="${escapeHtml(post.search)}"
           >
@@ -458,7 +501,9 @@ ${post.tags.map((tag) => `                <span>${escapeHtml(tag)}</span>`).join
             </span>
             <span class="article-item__arrow">↗</span>
           </a>`;
-  }).join("\n");
+  }).join("\n")}
+            </div>
+          </details>`).join("\n");
 }
 
 function renderPostPage(post, socials) {
@@ -504,17 +549,48 @@ function renderPostPage(post, socials) {
     </header>
 
     <main class="page post-page inner-page">
+      <nav class="page-rail post-rail" aria-label="文章目录" data-post-toc>
+        <a href="#post-title" data-rail-link>00 / title</a>
+      </nav>
       <article class="post-shell" data-post-source="${escapeHtml(post.sourcePath)}">
         <a class="post-back" href="../articles.html">← 返回文章列表</a>
         <header class="post-header">
           <span class="page-heading__index post-meta-line">${escapeHtml(formatDateTime(post.date))} // ${escapeHtml(post.readTime)}</span>
-          <h1>${escapeHtml(post.title)}</h1>
+          <h1 id="post-title">${escapeHtml(post.title)}</h1>
           <p>${escapeHtml(post.summary)}</p>
           <div class="article-item__tags">${tags}</div>
+          <dl class="post-stats" aria-label="文章统计">
+            <div>
+              <dt>Words</dt>
+              <dd data-post-word-count>--</dd>
+            </div>
+            <div>
+              <dt>Read</dt>
+              <dd data-post-read-time>--</dd>
+            </div>
+            <div>
+              <dt>Views</dt>
+              <dd><span id="busuanzi_value_page_pv">--</span></dd>
+            </div>
+          </dl>
         </header>
         <div class="post-content">
 ${post.bodyHtml}
         </div>
+        <section class="post-comments" id="comments" aria-label="评论与回应">
+          <div class="post-comments__head">
+            <span>comments</span>
+            <h2>评论与回应</h2>
+          </div>
+          <div
+            class="giscus-slot"
+            data-giscus-comments
+            data-repo="maki-cloud7/maki-s-blog"
+            data-repo-id="REPLACE_WITH_GISCUS_REPO_ID"
+            data-category="Announcements"
+            data-category-id="REPLACE_WITH_GISCUS_CATEGORY_ID"
+          ></div>
+        </section>
       </article>
     </main>
 
@@ -527,6 +603,7 @@ ${renderFooterSocial(socials)}
     </footer>
 
     <script src="../script.js?v=${assetVersion}"></script>
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
   </body>
 </html>
 `;

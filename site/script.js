@@ -21,6 +21,8 @@ const copy = {
     "friends.friend.three": "关于生活、语言和小项目。",
     "guestbook.title": "留言板",
     "guestbook.description": "欢迎留下想法、问题、建议，或者只是打个招呼。",
+    "guestbook.panel.title": "留言板 / Guestbook",
+    "guestbook.copy": "欢迎留下想法、问题、建议，或者只是打个招呼。",
     "guestbook.form.label": "留言内容",
     "guestbook.form.placeholder": "写下想说的话...",
     "guestbook.form.submit": "提交",
@@ -111,6 +113,8 @@ const copy = {
     "friends.friend.three": "Life, language, and small projects.",
     "guestbook.title": "Guestbook",
     "guestbook.description": "Leave a thought, question, suggestion, or just say hello.",
+    "guestbook.panel.title": "Guestbook",
+    "guestbook.copy": "Leave a thought, question, suggestion, or just say hello.",
     "guestbook.form.label": "Message",
     "guestbook.form.placeholder": "Write something...",
     "guestbook.form.submit": "Submit",
@@ -207,10 +211,14 @@ const aboutCards = Array.from(document.querySelectorAll("[data-about-card]"));
 const revealItems = Array.from(document.querySelectorAll(".reveal-on-scroll"));
 const pageSections = Array.from(document.querySelectorAll("[data-page-section]"));
 const railLinks = Array.from(document.querySelectorAll("[data-rail-link]"));
+const postToc = document.querySelector("[data-post-toc]");
 const innerPage = document.querySelector(".inner-page");
 const spotlightCards = Array.from(document.querySelectorAll(".composition-card, .friend-card, .project-card, .profile-card, .article-item, .guestbook-panel, .guestbook-signal"));
 const localClock = document.querySelector("[data-local-clock]");
 const postShell = document.querySelector("[data-post-source]");
+const postContent = document.querySelector(".post-content");
+const codeBlocks = Array.from(document.querySelectorAll("[data-code-block], .post-content pre"));
+const giscusSlot = document.querySelector("[data-giscus-comments]");
 const isArticleIndex = Boolean(document.querySelector(".article-list--archive"));
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -488,6 +496,7 @@ function applyLanguage(lang) {
 
   resetTypewriter();
   updateArticleFilters();
+  initPostStats();
 }
 
 function splitPhraseTokens(phrase) {
@@ -665,6 +674,15 @@ function updateArticleFilters() {
     }
   });
 
+  document.querySelectorAll("[data-archive-year]").forEach((yearGroup) => {
+    const visibleItems = Array.from(yearGroup.querySelectorAll("[data-article]")).filter((item) => !item.classList.contains("is-hidden"));
+    const hasVisibleItems = visibleItems.length > 0;
+    yearGroup.classList.toggle("is-hidden", !hasVisibleItems);
+    if (query || activeTag !== "all") {
+      yearGroup.open = hasVisibleItems;
+    }
+  });
+
   if (articleCount) {
     const label = currentLang === "zh" ? `${visibleCount} 篇文章` : `${visibleCount} articles`;
     articleCount.textContent = label;
@@ -673,6 +691,200 @@ function updateArticleFilters() {
   if (emptyArticles) {
     emptyArticles.hidden = visibleCount !== 0;
   }
+}
+
+function initCodeCopyButtons() {
+  if (!codeBlocks.length) {
+    return;
+  }
+
+  codeBlocks.forEach((block) => {
+    if (block.querySelector(".code-copy-button")) {
+      return;
+    }
+
+    const button = document.createElement("button");
+    button.className = "code-copy-button";
+    button.type = "button";
+    button.textContent = "Copy";
+    button.setAttribute("aria-label", "Copy code block");
+    block.append(button);
+
+    button.addEventListener("click", async () => {
+      const code = block.querySelector("code")?.textContent || "";
+      try {
+        await navigator.clipboard.writeText(code);
+        button.textContent = "Copied!";
+        button.classList.add("is-copied");
+        window.setTimeout(() => {
+          button.textContent = "Copy";
+          button.classList.remove("is-copied");
+        }, 1500);
+      } catch {
+        button.textContent = "Failed";
+        window.setTimeout(() => {
+          button.textContent = "Copy";
+        }, 1500);
+      }
+    });
+  });
+}
+
+function countPostWords(text = "") {
+  const chineseChars = text.match(/[\u4e00-\u9fff]/g)?.length || 0;
+  const westernWords = text
+    .replace(/[\u4e00-\u9fff]/g, " ")
+    .match(/[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*/g)?.length || 0;
+  return chineseChars + westernWords;
+}
+
+function initPostStats() {
+  if (!postContent) {
+    return;
+  }
+
+  const wordCount = countPostWords(postContent.innerText || "");
+  const minutes = Math.max(1, Math.ceil(wordCount / 420));
+  const wordTarget = document.querySelector("[data-post-word-count]");
+  const readTarget = document.querySelector("[data-post-read-time]");
+
+  if (wordTarget) {
+    wordTarget.textContent = currentLang === "zh" ? `${wordCount} 字` : `${wordCount} words`;
+  }
+
+  if (readTarget) {
+    readTarget.textContent = currentLang === "zh" ? `${minutes} 分钟` : `${minutes} min`;
+  }
+}
+
+function initReadProgressRecovery() {
+  if (!postShell) {
+    return;
+  }
+
+  const key = `maki-read-progress:${window.location.pathname}`;
+  const saved = Number(localStorage.getItem(key) || 0);
+  const maxScroll = getScrollMax();
+  let saveTimer = 0;
+
+  if (saved > 240 && saved < maxScroll - 160) {
+    const toast = document.createElement("div");
+    toast.className = "read-recovery";
+    toast.innerHTML = `
+      <span>是否继续阅读？</span>
+      <button type="button" data-read-resume>继续</button>
+      <button type="button" data-read-dismiss>忽略</button>
+    `;
+    document.body.append(toast);
+    requestAnimationFrame(() => toast.classList.add("is-visible"));
+
+    toast.querySelector("[data-read-resume]")?.addEventListener("click", () => {
+      window.scrollTo({ top: saved, behavior: reduceMotion ? "auto" : "smooth" });
+      toast.remove();
+    });
+    toast.querySelector("[data-read-dismiss]")?.addEventListener("click", () => toast.remove());
+  }
+
+  window.addEventListener("scroll", () => {
+    if (saveTimer) {
+      return;
+    }
+    saveTimer = window.setTimeout(() => {
+      saveTimer = 0;
+      localStorage.setItem(key, String(Math.round(window.scrollY)));
+    }, 400);
+  }, { passive: true });
+}
+
+function buildPostToc() {
+  if (!postToc || !postContent) {
+    return;
+  }
+
+  const headings = [
+    document.querySelector("#post-title"),
+    ...postContent.querySelectorAll("h2[id], h3[id]"),
+    document.querySelector("#comments"),
+  ].filter(Boolean);
+
+  if (!headings.length) {
+    return;
+  }
+
+  postToc.innerHTML = headings.map((heading, index) => {
+    const label = heading.id === "comments" ? "comments" : heading.textContent.trim();
+    return `<a href="#${heading.id}" data-rail-link>${String(index).padStart(2, "0")} / ${escapeHtml(label)}</a>`;
+  }).join("");
+
+  const links = Array.from(postToc.querySelectorAll("[data-rail-link]"));
+  const setActive = (id) => {
+    links.forEach((link) => {
+      const active = link.getAttribute("href") === `#${id}`;
+      link.classList.toggle("is-active", active);
+      if (active) {
+        link.setAttribute("aria-current", "true");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    });
+  };
+
+  links.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      const target = document.querySelector(link.getAttribute("href"));
+      if (!target) {
+        return;
+      }
+      event.preventDefault();
+      target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+      history.replaceState(null, "", link.getAttribute("href"));
+    });
+  });
+
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+      if (visible) {
+        setActive(visible.target.id);
+      }
+    }, { rootMargin: "-18% 0px -62% 0px", threshold: [0, 0.2, 0.8] });
+
+    headings.forEach((heading) => observer.observe(heading));
+  }
+
+  setActive(headings[0].id);
+}
+
+function initGiscus() {
+  if (!giscusSlot) {
+    return;
+  }
+
+  const repoId = giscusSlot.dataset.repoId;
+  const categoryId = giscusSlot.dataset.categoryId;
+  if (!repoId || !categoryId || repoId.startsWith("REPLACE_") || categoryId.startsWith("REPLACE_")) {
+    giscusSlot.innerHTML = '<p class="giscus-placeholder">Giscus 需要补充 repo-id 和 category-id 后启用。</p>';
+    return;
+  }
+
+  const script = document.createElement("script");
+  script.src = "https://giscus.app/client.js";
+  script.async = true;
+  script.crossOrigin = "anonymous";
+  script.setAttribute("data-repo", giscusSlot.dataset.repo);
+  script.setAttribute("data-repo-id", repoId);
+  script.setAttribute("data-category", giscusSlot.dataset.category || "Announcements");
+  script.setAttribute("data-category-id", categoryId);
+  script.setAttribute("data-mapping", "pathname");
+  script.setAttribute("data-strict", "0");
+  script.setAttribute("data-reactions-enabled", "1");
+  script.setAttribute("data-emit-metadata", "0");
+  script.setAttribute("data-input-position", "top");
+  script.setAttribute("data-theme", "transparent_dark");
+  script.setAttribute("data-lang", currentLang === "zh" ? "zh-CN" : "en");
+  giscusSlot.append(script);
 }
 
 function parseMarkdownPost(source = "") {
@@ -1125,6 +1337,23 @@ clearArticles?.addEventListener("click", () => {
 });
 
 initOwnerEditor();
+initCodeCopyButtons();
+initPostStats();
+initReadProgressRecovery();
+buildPostToc();
+initGiscus();
+
+document.querySelectorAll("[data-rail-link]").forEach((link) => {
+  link.addEventListener("click", (event) => {
+    const target = document.querySelector(link.getAttribute("href"));
+    if (!target) {
+      return;
+    }
+    event.preventDefault();
+    target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    history.replaceState(null, "", link.getAttribute("href"));
+  });
+});
 
 aboutCards.forEach((card) => {
   card.addEventListener("mousemove", (event) => {
