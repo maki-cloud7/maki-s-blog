@@ -1,26 +1,12 @@
-[
-  {
-    "id": "akira-notes",
-    "name": "Akira Notes",
-    "description": "写设计、摄影和日常观察。",
-    "meta": "design / photo",
-    "avatar": "A",
-    "url": "friends.html#akira-notes"
-  },
-  {
-    "id": "north-lab",
-    "name": "North Lab",
-    "description": "前端实验和独立工具记录。",
-    "meta": "frontend / tools",
-    "avatar": "N",
-    "url": "friends.html#north-lab"
-  },
-  {
-    "id": "yuki-blog",
-    "name": "Yuki Blog",
-    "description": "关于生活、语言和小项目。",
-    "meta": "life / language",
-    "avatar": "Y",
-    "url": "friends.html#yuki-blog"
-  }
-]
+{
+  "friends": [
+    {
+      "id": "sunwei",
+      "name": "伟德",
+      "description": "测试友链网站",
+      "meta": "",
+      "avatar": "",
+      "url": "sunwei.xyz"
+    }
+  ]
+}
