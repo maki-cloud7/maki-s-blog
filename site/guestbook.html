@@ -61,29 +61,32 @@
       </section>
 
       <section class="page-panel" id="guestbook-panel" aria-label="留言板" data-page-section>
-        <div class="guestbook-stack">
-          <div class="guestbook-layout guestbook-layout--comments">
-            <aside class="guestbook-signal" aria-hidden="true">
-              <span>public channel</span>
-              <strong>notes, visible to everyone.</strong>
-              <div class="guestbook-signal__rows">
-                <span>github</span>
-                <span>issues</span>
-                <span>public</span>
-              </div>
-            </aside>
-            <div class="guestbook-panel guestbook-panel--comments">
-              <section class="guestbook-panel__intro" aria-labelledby="guestbook-compose-title">
-                <span>public comments</span>
-                <h2 id="guestbook-compose-title" data-i18n="guestbook.panel.title">留言板 / Guestbook</h2>
-                <p>这里使用 GitHub Issues 保存留言。登录 GitHub 后即可留言，所有访客都能看到。</p>
-                <div class="guestbook-panel__facts" aria-hidden="true">
-                  <span>sign in with GitHub</span>
-                  <span>one thread for this page</span>
-                  <span>public archive</span>
-                </div>
-              </section>
+        <div class="guestbook-board">
+          <section class="guestbook-brief" aria-labelledby="guestbook-compose-title">
+            <span class="guestbook-kicker">public channel</span>
+            <h2 id="guestbook-compose-title" data-i18n="guestbook.panel.title">留言板 / Guestbook</h2>
+            <p>这里使用 GitHub Issues 保存留言。登录 GitHub 后即可留言，所有访客都能看到。可以写建议、问题、想法，或者只是打个招呼。</p>
+          </section>
+          <aside class="guestbook-protocol" aria-label="留言方式">
+            <div>
+              <span>01</span>
+              <strong>GitHub sign-in</strong>
+              <p>使用 GitHub 身份留言，不需要额外注册。</p>
             </div>
+            <div>
+              <span>02</span>
+              <strong>Public thread</strong>
+              <p>留言会公开显示在这个页面下方。</p>
+            </div>
+            <div>
+              <span>03</span>
+              <strong>Page archive</strong>
+              <p>同一页面对应同一条 issue 讨论线。</p>
+            </div>
+          </aside>
+          <div class="guestbook-divider" aria-hidden="true">
+            <span>utterances</span>
+            <span>github issues</span>
           </div>
           <section class="guestbook-comments" aria-label="公开留言">
             <script
