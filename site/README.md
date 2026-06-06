@@ -49,6 +49,8 @@ You can also add an optional caption:
 ![图片说明](/assets/uploads/example.jpg "图片说明")
 ```
 
+When signed in through the owner inline editor, use the `选择图片` button under the Markdown field. It uploads the selected image to `site/assets/uploads/` and inserts the Markdown image link at the cursor position.
+
 The script updates:
 
 - `index.html`

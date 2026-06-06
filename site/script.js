@@ -1006,6 +1006,42 @@ function buildNewPostPath(form) {
   return `site/content/posts/${date}-${slugifyPost(data.title)}.md`;
 }
 
+function slugifyUploadName(name = "") {
+  const extension = String(name).split(".").pop()?.toLowerCase() || "jpg";
+  const base = String(name)
+    .replace(/\.[^.]+$/, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gi, "-")
+    .replace(/^-+|-+$/g, "") || "image";
+  return `${Date.now()}-${base}.${extension}`;
+}
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      const result = String(reader.result || "");
+      resolve(result.includes(",") ? result.split(",").pop() : result);
+    });
+    reader.addEventListener("error", () => reject(reader.error || new Error("Could not read file")));
+    reader.readAsDataURL(file);
+  });
+}
+
+function insertAtCursor(textarea, text) {
+  const start = textarea.selectionStart ?? textarea.value.length;
+  const end = textarea.selectionEnd ?? textarea.value.length;
+  const before = textarea.value.slice(0, start);
+  const after = textarea.value.slice(end);
+  const prefix = before && !before.endsWith("\n") ? "\n\n" : "";
+  const suffix = after && !after.startsWith("\n") ? "\n\n" : "";
+  textarea.value = `${before}${prefix}${text}${suffix}${after}`;
+  const nextCursor = before.length + prefix.length + text.length;
+  textarea.focus();
+  textarea.setSelectionRange(nextCursor, nextCursor);
+}
+
 function markdownPreview(markdown = "") {
   return markdown
     .split(/\n{2,}/)
@@ -1019,6 +1055,13 @@ function markdownPreview(markdown = "") {
       }
       if (text.startsWith("### ")) {
         return `<h3>${escapeHtml(text.slice(4))}</h3>`;
+      }
+      if (/^!\[[^\]]*\]\([^)]+\)$/.test(text)) {
+        const match = text.match(/^!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)$/);
+        if (match) {
+          const caption = escapeHtml(match[3] || match[1] || "");
+          return `<figure class="post-image"><img src="${escapeHtml(match[2])}" alt="${escapeHtml(match[1] || "")}" loading="lazy" decoding="async" />${caption ? `<figcaption>${caption}</figcaption>` : ""}</figure>`;
+        }
       }
       if (text.split("\n").every((line) => /^-\s+/.test(line))) {
         return `<ul>${text.split("\n").map((line) => `<li>${escapeHtml(line.replace(/^-\s+/, ""))}</li>`).join("")}</ul>`;
@@ -1098,6 +1141,8 @@ function renderEditorPanel(post, options = {}) {
       <div class="post-editor__preview post-content" data-editor-preview hidden></div>
       <div class="post-editor__actions">
         <span class="post-editor__status" data-editor-status></span>
+        <input class="post-editor__file" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/avif" data-editor-image-input />
+        <button class="post-editor__ghost" type="button" data-editor-image-button>选择图片</button>
         <button class="post-editor__ghost" type="button" data-editor-preview-toggle>Preview</button>
         <button class="post-editor__button" type="submit">${mode === "create" ? "Create Post" : "Save to GitHub"}</button>
       </div>
@@ -1112,6 +1157,48 @@ function renderEditorPanel(post, options = {}) {
     preview.hidden = !preview.hidden;
     if (!preview.hidden) {
       preview.innerHTML = markdownPreview(form.elements.body.value);
+    }
+  });
+
+  const imageInput = panel.querySelector("[data-editor-image-input]");
+  panel.querySelector("[data-editor-image-button]")?.addEventListener("click", () => imageInput?.click());
+  imageInput?.addEventListener("change", async () => {
+    const file = imageInput.files?.[0];
+    if (!file) {
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      setEditorStatus(panel, "Please choose an image file.", "error");
+      imageInput.value = "";
+      return;
+    }
+
+    setEditorStatus(panel, "Uploading image...");
+    try {
+      const fileName = slugifyUploadName(file.name);
+      const response = await fetch("/api/post", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "upload",
+          path: `site/assets/uploads/${fileName}`,
+          content: await readFileAsBase64(file),
+          message: `Upload image: ${fileName}`,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Upload failed");
+      }
+      insertAtCursor(form.elements.body, `![${file.name.replace(/\.[^.]+$/, "")}](${result.publicUrl})`);
+      setEditorStatus(panel, "Image inserted. Save the post when ready.", "success");
+      if (!preview.hidden) {
+        preview.innerHTML = markdownPreview(form.elements.body.value);
+      }
+    } catch (error) {
+      setEditorStatus(panel, error.message, "error");
+    } finally {
+      imageInput.value = "";
     }
   });
 

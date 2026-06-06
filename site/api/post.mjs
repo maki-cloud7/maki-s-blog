@@ -3,6 +3,7 @@ import {
   githubRequest,
   requireAuthorizedSession,
   safePostPath,
+  safeUploadPath,
   sendError,
   sendJson,
 } from "./_lib/github.mjs";
@@ -41,6 +42,32 @@ export default async function handler(req, res) {
       }
 
       const body = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
+
+      if (body.type === "upload") {
+        const filePath = safeUploadPath(body.path);
+        const content = String(body.content || "");
+        const message = String(body.message || `Upload image: ${filePath}`).slice(0, 180);
+        const result = await githubRequest(`/repos/${repo.owner}/${repo.repo}/contents/${encodeURIComponent(filePath).replaceAll("%2F", "/")}`, {
+          token: session.token,
+          method: "PUT",
+          body: {
+            message,
+            content,
+            branch: repo.branch,
+          },
+        });
+
+        sendJson(res, 200, {
+          ok: true,
+          path: filePath,
+          publicUrl: `/${filePath.replace(/^site\//, "")}`,
+          commit: result.commit?.sha,
+          sha: result.content?.sha,
+          url: result.commit?.html_url,
+        });
+        return;
+      }
+
       const filePath = safePostPath(body.path);
       const content = String(body.content || "");
       const sha = String(body.sha || "");

@@ -234,6 +234,16 @@ export function safePostPath(value) {
   return filePath;
 }
 
+export function safeUploadPath(value) {
+  const filePath = String(value || "").trim();
+  if (!/^site\/assets\/uploads\/[a-z0-9][a-z0-9._-]*\.(avif|gif|jpe?g|png|webp)$/i.test(filePath) || filePath.includes("..")) {
+    const error = new Error("Invalid upload path");
+    error.status = 400;
+    throw error;
+  }
+  return filePath;
+}
+
 export function sendJson(res, status, data) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
