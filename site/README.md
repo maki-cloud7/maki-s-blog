@@ -37,6 +37,18 @@ Then run:
 node scripts/build-site.mjs
 ```
 
+Images can be inserted with normal Markdown syntax. Upload files to `assets/uploads/` through the CMS or manually, then reference them from a post:
+
+```md
+![图片说明](/assets/uploads/example.jpg)
+```
+
+You can also add an optional caption:
+
+```md
+![图片说明](/assets/uploads/example.jpg "图片说明")
+```
+
 The script updates:
 
 - `index.html`
@@ -73,6 +85,12 @@ GITHUB_OWNER=maki-cloud7
 GITHUB_REPO=maki-s-blog
 GITHUB_BRANCH=main
 ALLOWED_GITHUB_LOGIN=
+```
+
+Per-post view counts use `/api/views` and are keyed by each article pathname. To allow the API to persist counts into `site/content/views.json`, add a GitHub token with repository contents write access:
+
+```text
+VIEWS_GITHUB_TOKEN=
 ```
 
 Create the GitHub OAuth App callback URL as:

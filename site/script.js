@@ -219,6 +219,7 @@ const postShell = document.querySelector("[data-post-source]");
 const postContent = document.querySelector(".post-content");
 const codeBlocks = Array.from(document.querySelectorAll("[data-code-block], .post-content pre"));
 const giscusSlot = document.querySelector("[data-giscus-comments]");
+const postViewCount = document.querySelector("[data-post-view-count]");
 const isArticleIndex = Boolean(document.querySelector(".article-list--archive"));
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -754,6 +755,32 @@ function initPostStats() {
 
   if (readTarget) {
     readTarget.textContent = currentLang === "zh" ? `${minutes} 分钟` : `${minutes} min`;
+  }
+}
+
+async function initPostViews() {
+  if (!postViewCount || !postShell) {
+    return;
+  }
+
+  const path = window.location.pathname;
+  const viewKey = `maki-viewed:${path}`;
+  const viewedAt = Number(localStorage.getItem(viewKey) || 0);
+  const recentlyViewed = Date.now() - viewedAt < 60 * 60 * 1000;
+  const method = recentlyViewed ? "GET" : "POST";
+
+  try {
+    const response = await fetch(`/api/views?path=${encodeURIComponent(path)}`, { method });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || "Could not load views");
+    }
+    postViewCount.textContent = String(Number(data.count || 0));
+    if (method === "POST" && data.writable !== false) {
+      localStorage.setItem(viewKey, String(Date.now()));
+    }
+  } catch {
+    postViewCount.textContent = "0";
   }
 }
 
@@ -1339,6 +1366,7 @@ clearArticles?.addEventListener("click", () => {
 initOwnerEditor();
 initCodeCopyButtons();
 initPostStats();
+initPostViews();
 initReadProgressRecovery();
 buildPostToc();
 initGiscus();

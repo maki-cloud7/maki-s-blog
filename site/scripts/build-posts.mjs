@@ -89,11 +89,31 @@ function markdownToHtml(markdown) {
     return `<pre data-code-block data-language="${escapeHtml(language)}"><code>${escapeHtml(match[2])}</code></pre>`;
   }
 
+  function renderImageBlock(block) {
+    const match = block.match(/^!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)$/);
+    if (!match) {
+      return null;
+    }
+
+    const alt = escapeHtml(match[1] || "");
+    const src = escapeHtml(match[2] || "");
+    const caption = escapeHtml(match[3] || match[1] || "");
+    return `<figure class="post-image"><img src="${src}" alt="${alt}" loading="lazy" decoding="async" />${caption ? `<figcaption>${caption}</figcaption>` : ""}</figure>`;
+  }
+
   blocks.forEach((block) => {
-    const codeBlock = renderCodeBlock(block.trim());
+    const trimmedBlock = block.trim();
+    const codeBlock = renderCodeBlock(trimmedBlock);
     if (codeBlock) {
       closeList();
       html.push(codeBlock);
+      return;
+    }
+
+    const imageBlock = renderImageBlock(trimmedBlock);
+    if (imageBlock) {
+      closeList();
+      html.push(imageBlock);
       return;
     }
 
@@ -134,6 +154,7 @@ function markdownToHtml(markdown) {
 
 function formatInline(value) {
   return escapeHtml(value)
+    .replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+&quot;([^&]*)&quot;)?\)/g, '<img class="post-inline-image" src="$2" alt="$1" loading="lazy" decoding="async" />')
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
     .replace(/`(.+?)`/g, "<code>$1</code>")
@@ -559,7 +580,7 @@ function renderPostPage(post, socials) {
             <span>${escapeHtml(formatDateTime(post.date))}</span>
             <span data-post-word-count>--</span>
             <span data-post-read-time>${escapeHtml(post.readTime)}</span>
-            <span><span id="busuanzi_value_page_pv">--</span> 浏览</span>
+            <span><span data-post-view-count>--</span> 浏览</span>
           </span>
           <h1 id="post-title">${escapeHtml(post.title)}</h1>
           <p>${escapeHtml(post.summary)}</p>
@@ -594,7 +615,6 @@ ${renderFooterSocial(socials)}
     </footer>
 
     <script src="../script.js?v=${assetVersion}"></script>
-    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
   </body>
 </html>
 `;
