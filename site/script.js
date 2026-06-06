@@ -1631,12 +1631,6 @@ window.addEventListener("keydown", (event) => {
   hGroup.setAttribute("fill", "none");
   svg.appendChild(hGroup);
 
-  const signalGroup = document.createElementNS(NS, "g");
-  signalGroup.setAttribute("fill", "none");
-  signalGroup.setAttribute("stroke-linecap", "round");
-  signalGroup.setAttribute("stroke-linejoin", "round");
-  svg.appendChild(signalGroup);
-
   function isDark() {
     return document.documentElement.dataset.theme === "dark";
   }
@@ -1654,20 +1648,19 @@ window.addEventListener("keydown", (event) => {
       hLine.setAttribute("y1", y);
       hLine.setAttribute("x2", width);
       hLine.setAttribute("y2", y);
-      hLine.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.032)" : "rgba(16,16,16,0.026)");
+      hLine.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.04)" : "rgba(16,16,16,0.035)");
       hLine.setAttribute("stroke-width", "1");
       hGroup.appendChild(hLine);
     }
     lineGroup.textContent = "";
     glowGroup.textContent = "";
-    signalGroup.textContent = "";
     lines.length = 0;
     const count = Math.floor(width / GRID_SIZE) + 1;
     for (let i = 0; i < count; i++) {
       const x = i * GRID_SIZE;
       const line = document.createElementNS(NS, "path");
       line.setAttribute("d", `M ${x},0 L ${x},${height}`);
-      line.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.032)" : "rgba(16,16,16,0.026)");
+      line.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.04)" : "rgba(16,16,16,0.035)");
       line.setAttribute("stroke-width", "1");
       lineGroup.appendChild(line);
       const glowLine = document.createElementNS(NS, "path");
@@ -1685,71 +1678,6 @@ window.addEventListener("keydown", (event) => {
         glowEl: glowLine,
       });
     }
-
-    const phi = (1 + Math.sqrt(5)) / 2;
-    const accentColor = isDark() ? "rgba(255,55,55,0.34)" : "rgba(225,25,25,0.3)";
-    const guideColor = isDark() ? "rgba(244,243,238,0.11)" : "rgba(16,16,16,0.09)";
-    const quietColor = isDark() ? "rgba(244,243,238,0.06)" : "rgba(16,16,16,0.05)";
-    const rectW = Math.min(width * 0.72, height * phi * 0.82);
-    const rectH = rectW / phi;
-    const rectX = width * 0.5 - rectW * 0.46;
-    const rectY = height * 0.5 - rectH * 0.52;
-    const splitX = rectX + rectW / phi;
-    const splitY = rectY + rectH / phi;
-
-    const addPath = (d, stroke, strokeWidth = 1, opacity = 1, dash = "") => {
-      const path = document.createElementNS(NS, "path");
-      path.setAttribute("d", d);
-      path.setAttribute("stroke", stroke);
-      path.setAttribute("stroke-width", strokeWidth);
-      path.setAttribute("opacity", opacity);
-      if (dash) {
-        path.setAttribute("stroke-dasharray", dash);
-      }
-      signalGroup.appendChild(path);
-    };
-
-    const addRect = (x, y, rectWidth, rectHeight, stroke, opacity = 1) => {
-      const rect = document.createElementNS(NS, "rect");
-      rect.setAttribute("x", x);
-      rect.setAttribute("y", y);
-      rect.setAttribute("width", rectWidth);
-      rect.setAttribute("height", rectHeight);
-      rect.setAttribute("stroke", stroke);
-      rect.setAttribute("stroke-width", "1");
-      rect.setAttribute("opacity", opacity);
-      signalGroup.appendChild(rect);
-    };
-
-    addRect(rectX, rectY, rectW, rectH, guideColor, 0.86);
-    addRect(rectX, rectY, rectW / phi, rectH, quietColor, 0.8);
-    addRect(splitX, rectY, rectW - rectW / phi, rectH / phi, quietColor, 0.72);
-    addRect(splitX, splitY, (rectW - rectW / phi) / phi, rectH - rectH / phi, quietColor, 0.64);
-    addPath(`M ${rectX},${rectY + rectH} L ${rectX + rectW},${rectY}`, guideColor, 1, 0.7, "10 18");
-    addPath(`M ${rectX},${rectY} L ${rectX + rectW},${rectY + rectH}`, quietColor, 1, 0.6, "4 18");
-    addPath(`M ${splitX},${rectY} L ${splitX},${rectY + rectH}`, accentColor, 1.4, 0.86);
-    addPath(`M ${rectX},${splitY} L ${rectX + rectW},${splitY}`, accentColor, 1.1, 0.58);
-
-    const arcSize = rectH;
-    addPath(`M ${rectX},${rectY + rectH} A ${arcSize},${arcSize} 0 0 1 ${rectX + arcSize},${rectY}`, accentColor, 1.6, 0.78);
-    addPath(`M ${splitX},${rectY} A ${rectW - rectW / phi},${rectW - rectW / phi} 0 0 1 ${rectX + rectW},${splitY}`, guideColor, 1, 0.66);
-    addPath(`M ${rectX + rectW},${splitY} A ${(rectH - rectH / phi)},${(rectH - rectH / phi)} 0 0 1 ${splitX},${rectY + rectH}`, guideColor, 1, 0.48);
-
-    [
-      [splitX, rectY, 4],
-      [splitX, splitY, 5],
-      [rectX + rectW / phi / phi, splitY, 3],
-      [rectX + rectW, rectY + rectH, 3],
-    ].forEach(([cx, cy, radius]) => {
-      const node = document.createElementNS(NS, "circle");
-      node.setAttribute("cx", cx);
-      node.setAttribute("cy", cy);
-      node.setAttribute("r", radius);
-      node.setAttribute("fill", isDark() ? "#11110f" : "#f7f7f4");
-      node.setAttribute("stroke", accentColor);
-      node.setAttribute("stroke-width", "1.5");
-      signalGroup.appendChild(node);
-    });
   }
 
   function updateLinePath(line, bend) {
@@ -1765,14 +1693,14 @@ window.addEventListener("keydown", (event) => {
     if (Math.abs(bend) < 0.05 || mouseY < -100) {
       d = `M ${x},0 L ${x},${height}`;
       line.glowEl.setAttribute("stroke", "rgba(179,42,37,0)");
-      line.lineEl.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.032)" : "rgba(16,16,16,0.026)");
+      line.lineEl.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.04)" : "rgba(16,16,16,0.035)");
     } else {
       const cpX = x + bend;
       d = `M ${x},0 L ${x},${top} Q ${cpX},${mouseY} ${x},${bottom} L ${x},${height}`;
       const bendRatio = Math.min(1, Math.abs(bend) / MAX_BEND);
       const glowAlpha = (bendRatio * 0.36).toFixed(3);
       line.glowEl.setAttribute("stroke", `rgba(179,42,37,${glowAlpha})`);
-      line.lineEl.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.072)" : "rgba(16,16,16,0.058)");
+      line.lineEl.setAttribute("stroke", isDark() ? "rgba(244,243,238,0.085)" : "rgba(16,16,16,0.07)");
     }
     line.lineEl.setAttribute("d", d);
     line.glowEl.setAttribute("d", d);
