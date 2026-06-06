@@ -60,7 +60,12 @@ function parseFrontMatter(source, fileName) {
 }
 
 function markdownToHtml(markdown) {
-  const blocks = markdown.split(/\n{2,}/);
+  const normalizedMarkdown = String(markdown || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\n(?=#{1,6}\s+)/g, "\n\n")
+    .replace(/\n(?=!\[[^\]]*\]\([^)]+\))/g, "\n\n")
+    .replace(/\n(?=---+\s*$)/gm, "\n\n");
+  const blocks = normalizedMarkdown.split(/\n{2,}/);
   const html = [];
   let inList = false;
   const headingIds = new Map();

@@ -1043,7 +1043,11 @@ function insertAtCursor(textarea, text) {
 }
 
 function markdownPreview(markdown = "") {
-  return markdown
+  return String(markdown || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\n(?=#{1,6}\s+)/g, "\n\n")
+    .replace(/\n(?=!\[[^\]]*\]\([^)]+\))/g, "\n\n")
+    .replace(/\n(?=---+\s*$)/gm, "\n\n")
     .split(/\n{2,}/)
     .map((block) => {
       const text = block.trim();
