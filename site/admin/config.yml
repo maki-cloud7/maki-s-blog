@@ -1,0 +1,82 @@
+backend:
+  name: github
+  repo: maki-cloud7/maki-s-blog
+  branch: main
+
+site_url: https://maki-s-blog.vercel.app
+display_url: https://maki-s-blog.vercel.app
+logo_url: https://maki-s-blog.vercel.app/favicon.ico
+
+media_folder: site/assets/uploads
+public_folder: /assets/uploads
+
+slug:
+  encoding: ascii
+  clean_accents: true
+
+collections:
+  - name: posts
+    label: 文章
+    label_singular: 文章
+    icon: article
+    folder: site/content/posts
+    create: true
+    extension: md
+    format: yaml-frontmatter
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { name: title, label: 标题, widget: string }
+      - { name: date, label: 日期, widget: datetime, date_format: "YYYY-MM-DD", time_format: false }
+      - { name: tags, label: 标签, widget: list, default: ["Notes"] }
+      - { name: summary, label: 摘要, widget: text }
+      - { name: readTime, label: 阅读时间, widget: string, default: "5 min read" }
+      - { name: draft, label: 草稿, widget: boolean, default: false, required: false }
+      - { name: body, label: 正文, widget: markdown }
+
+  - name: content_data
+    label: 内容数据
+    icon: database
+    files:
+      - name: projects
+        label: 项目
+        file: site/content/projects.json
+        format: json
+        fields:
+          - name: projects
+            label: 项目列表
+            widget: list
+            summary: "{{fields.title}}"
+            fields:
+              - { name: id, label: ID, widget: string, hint: "只用英文、小写和连字符，例如 blog-system。" }
+              - { name: title, label: 名称, widget: string }
+              - { name: tag, label: 类型标签, widget: string, default: tools }
+              - { name: summary, label: 简介, widget: text }
+              - { name: meta, label: 元信息, widget: string, required: false }
+              - { name: url, label: 链接, widget: string, required: false }
+
+      - name: friends
+        label: 友链
+        file: site/content/friends.json
+        format: json
+        fields:
+          - name: friends
+            label: 友链列表
+            widget: list
+            summary: "{{fields.name}}"
+            fields:
+              - { name: id, label: ID, widget: string, hint: "只用英文、小写和连字符，例如 friend-blog。" }
+              - { name: name, label: 名称, widget: string }
+              - { name: description, label: 简介, widget: text }
+              - { name: meta, label: 元信息, widget: string, required: false }
+              - { name: avatar, label: 头像字母, widget: string, required: false }
+              - { name: url, label: 链接, widget: string, required: false }
+
+      - name: tags
+        label: 标签
+        file: site/content/tags.json
+        format: json
+        fields:
+          - name: tags
+            label: 标签列表
+            widget: list
+            default: ["Notes"]

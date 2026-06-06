@@ -135,6 +135,16 @@ async function readJson(filePath, fallback = []) {
   }
 }
 
+function normalizeList(value, key) {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  if (value && Array.isArray(value[key])) {
+    return value[key];
+  }
+  return [];
+}
+
 async function loadPosts() {
   const files = (await readdir(postsDir)).filter((file) => file.endsWith(".md") && file !== "README.md");
   const posts = [];
@@ -305,9 +315,9 @@ function renderFriends(friends) {
 
 async function main() {
   const posts = await loadPosts();
-  const projects = await readJson(projectsFile);
-  const friends = await readJson(friendsFile);
-  globalThis.configuredTags = await readJson(tagsFile);
+  const projects = normalizeList(await readJson(projectsFile), "projects");
+  const friends = normalizeList(await readJson(friendsFile), "friends");
+  globalThis.configuredTags = normalizeList(await readJson(tagsFile), "tags");
   await mkdir(outputDir, { recursive: true });
 
   let indexHtml = await readFile(path.join(root, "index.html"), "utf8");
