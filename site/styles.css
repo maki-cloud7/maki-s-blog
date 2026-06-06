@@ -860,45 +860,6 @@ body.is-scrolling .hero::after {
   line-height: 1.75;
 }
 
-.post-stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  max-width: 620px;
-  margin: clamp(18px, 3vw, 28px) 0 0;
-  border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
-  background: color-mix(in srgb, var(--color-text) 10%, transparent);
-}
-
-.post-stats div {
-  display: grid;
-  gap: 4px;
-  min-width: 0;
-  padding: 12px 14px;
-  background: color-mix(in srgb, var(--color-bg) 86%, var(--color-surface));
-}
-
-.post-stats dt,
-.post-stats dd {
-  margin: 0;
-}
-
-.post-stats dt {
-  color: var(--color-muted);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.post-stats dd {
-  color: var(--color-text);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 820;
-}
-
 .post-content {
   display: grid;
   gap: 18px;
@@ -4437,10 +4398,6 @@ body.is-scrolling .hero::after {
     padding: 6px;
   }
 
-  .post-stats {
-    grid-template-columns: 1fr;
-  }
-
   .read-recovery {
     right: 16px;
     bottom: 16px;
@@ -4888,6 +4845,9 @@ body.is-scrolling .hero::after {
 
 .post-meta-line {
   display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 0;
   margin-bottom: 2px;
   color: var(--color-muted);
   font-size: 12.5px;
@@ -4895,7 +4855,13 @@ body.is-scrolling .hero::after {
   letter-spacing: 0.07em;
 }
 
-.post-meta-line::before {
-  content: "posted";
-  color: var(--color-accent);
+.post-meta-line span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.post-meta-line span + span::before {
+  content: "//";
+  margin-inline: 8px;
+  color: color-mix(in srgb, var(--color-muted) 58%, transparent);
 }

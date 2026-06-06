@@ -555,24 +555,15 @@ function renderPostPage(post, socials) {
       <article class="post-shell" data-post-source="${escapeHtml(post.sourcePath)}">
         <a class="post-back" href="../articles.html">← 返回文章列表</a>
         <header class="post-header">
-          <span class="page-heading__index post-meta-line">${escapeHtml(formatDateTime(post.date))} // ${escapeHtml(post.readTime)}</span>
+          <span class="page-heading__index post-meta-line">
+            <span>${escapeHtml(formatDateTime(post.date))}</span>
+            <span data-post-word-count>--</span>
+            <span data-post-read-time>${escapeHtml(post.readTime)}</span>
+            <span><span id="busuanzi_value_page_pv">--</span> 浏览</span>
+          </span>
           <h1 id="post-title">${escapeHtml(post.title)}</h1>
           <p>${escapeHtml(post.summary)}</p>
           <div class="article-item__tags">${tags}</div>
-          <dl class="post-stats" aria-label="文章统计">
-            <div>
-              <dt>Words</dt>
-              <dd data-post-word-count>--</dd>
-            </div>
-            <div>
-              <dt>Read</dt>
-              <dd data-post-read-time>--</dd>
-            </div>
-            <div>
-              <dt>Views</dt>
-              <dd><span id="busuanzi_value_page_pv">--</span></dd>
-            </div>
-          </dl>
         </header>
         <div class="post-content">
 ${post.bodyHtml}
