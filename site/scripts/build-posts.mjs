@@ -191,6 +191,28 @@ function absoluteUrl(urlPath = "") {
   return `${siteUrl}/${urlPath.replace(/^\/+/, "")}`;
 }
 
+function renderSocialIcon(social) {
+  const key = `${social.label || ""} ${social.url || ""}`;
+  if (/github/i.test(key)) {
+    return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 2.2c-5.5 0-9.9 4.5-9.9 10 0 4.4 2.9 8.1 6.8 9.4.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.2-3.4-1.2-.5-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 0 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.8.8.1-.6.3-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.3 9.3 0 0 1 4.9 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.7.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.6 5 .4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5a10 10 0 0 0 6.8-9.4c.1-5.5-4.4-10-9.9-10Z" />
+        </svg>`;
+  }
+  if (/telegram|t\.me/i.test(key)) {
+    return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M21.7 4.3c.3-1-.6-1.8-1.6-1.4L2.8 9.6c-1.2.5-1.2 2.2.1 2.6l4.4 1.4 1.7 5.4c.4 1.1 1.8 1.4 2.6.5l2.5-2.8 4.7 3.4c.9.7 2.2.2 2.4-1l2.5-14.8Zm-4.2 3.2-8.3 7.4-.3 3.1-1.1-3.7 9.7-6.8Z" />
+        </svg>`;
+  }
+  if (/bilibili|哔哩/i.test(key)) {
+    return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M8.4 3.5 10.7 6h2.6l2.3-2.5 1.3 1.2L15.7 6h2.1a3.2 3.2 0 0 1 3.2 3.2v8.1a3.2 3.2 0 0 1-3.2 3.2H6.2A3.2 3.2 0 0 1 3 17.3V9.2A3.2 3.2 0 0 1 6.2 6h2.1L7.1 4.7l1.3-1.2Zm-2.2 8.1v5.7c0 .5.4.9.9.9h10.7c.5 0 .9-.4.9-.9V9.2c0-.5-.4-.9-.9-.9H6.2c-.5 0-.9.4-.9.9v2.4h.9Zm2.3 1.1c.6 0 1 .4 1 1v1.2c0 .6-.4 1-1 1s-1-.4-1-1v-1.2c0-.6.4-1 1-1Zm7 0c.6 0 1 .4 1 1v1.2c0 .6-.4 1-1 1s-1-.4-1-1v-1.2c0-.6.4-1 1-1Z" />
+        </svg>`;
+  }
+  return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 2.5 21.5 8v8L12 21.5 2.5 16V8L12 2.5Zm0 2.8L5 9.3v5.4l7 4 7-4V9.3l-7-4Z" />
+        </svg>`;
+}
+
 function renderFooterSocial(socials) {
   if (!socials.length) {
     return "";
@@ -201,8 +223,7 @@ ${socials.map((social) => {
   const url = normalizeUrl(social.url);
   const externalAttrs = isExternalUrl(url) ? ' target="_blank" rel="noopener noreferrer"' : "";
   const label = escapeHtml(social.label);
-  const iconText = /github/i.test(`${social.label} ${social.url}`) ? "GH" : /bilibili|哔哩/i.test(`${social.label} ${social.url}`) ? "B" : label.slice(0, 2).toUpperCase();
-  return `        <a href="${escapeHtml(url)}"${externalAttrs} class="social-link" aria-label="${label}" title="${label}"><span class="social-icon" aria-hidden="true">${escapeHtml(iconText)}</span><span class="social-label">${label}</span></a>`;
+  return `        <a href="${escapeHtml(url)}"${externalAttrs} class="social-link" aria-label="${label}" title="${label}"><span class="social-icon" aria-hidden="true">${renderSocialIcon(social)}</span><span class="social-label">${label}</span></a>`;
 }).join("\n")}
       </div>`;
 }
@@ -260,6 +281,11 @@ function renderGuestbookPage(html) {
                 <span>public comments</span>
                 <h2 id="guestbook-compose-title" data-i18n="guestbook.panel.title">留言板 / Guestbook</h2>
                 <p>这里使用 GitHub Issues 保存留言。登录 GitHub 后即可留言，所有访客都能看到。</p>
+                <div class="guestbook-panel__facts" aria-hidden="true">
+                  <span>sign in with GitHub</span>
+                  <span>one thread for this page</span>
+                  <span>public archive</span>
+                </div>
               </section>
             </div>
           </div>
@@ -478,6 +504,10 @@ function renderPostPage(post, socials) {
       <article class="post-shell" data-post-source="${escapeHtml(post.sourcePath)}">
         <a class="post-back" href="../articles.html">← 返回文章列表</a>
         <header class="post-header">
+          <h1>${escapeHtml(post.title)}</h1>
+        </header>
+        <section class="post-deck" aria-label="文章摘要">
+          <p>${escapeHtml(post.summary)}</p>
           <div class="post-meta-panel" aria-label="文章信息">
             <span>
               <small>published</small>
@@ -488,10 +518,8 @@ function renderPostPage(post, socials) {
               <strong>${escapeHtml(post.readTime)}</strong>
             </span>
           </div>
-          <h1>${escapeHtml(post.title)}</h1>
-          <p>${escapeHtml(post.summary)}</p>
           <div class="article-item__tags">${tags}</div>
-        </header>
+        </section>
         <div class="post-content">
 ${post.bodyHtml}
         </div>
