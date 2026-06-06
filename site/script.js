@@ -790,17 +790,22 @@ function renderEditorPanel(post, options = {}) {
   panel.innerHTML = `
     <form class="post-editor__form" data-editor-form>
       <div class="post-editor__top">
-        <span>${mode === "create" ? "new post" : "owner editor"}</span>
+        <div class="post-editor__identity">
+          <span>${mode === "create" ? "compose" : "edit"}</span>
+          <strong>${mode === "create" ? "New post" : "Post source"}</strong>
+        </div>
         <button class="post-editor__ghost" type="button" data-editor-close>Close</button>
       </div>
-      <label>
-        <span>Title</span>
-        <input name="title" type="text" value="${escapeHtml(data.title || "")}" required />
-      </label>
-      <label>
-        <span>Summary</span>
-        <textarea name="summary" rows="3" required>${escapeHtml(data.summary || "")}</textarea>
-      </label>
+      <div class="post-editor__primary">
+        <label>
+          <span>Title</span>
+          <input name="title" type="text" value="${escapeHtml(data.title || "")}" required />
+        </label>
+        <label>
+          <span>Summary</span>
+          <textarea name="summary" rows="3" required>${escapeHtml(data.summary || "")}</textarea>
+        </label>
+      </div>
       <div class="post-editor__grid">
         <label>
           <span>Date</span>
@@ -819,15 +824,15 @@ function renderEditorPanel(post, options = {}) {
         <input name="draft" type="checkbox" ${data.draft === "true" ? "checked" : ""} />
         <span>Draft</span>
       </label>
-      <label>
+      <label class="post-editor__body">
         <span>Markdown</span>
         <textarea name="body" rows="18" required>${escapeHtml(body || "")}</textarea>
       </label>
       <div class="post-editor__preview post-content" data-editor-preview hidden></div>
       <div class="post-editor__actions">
-        <button class="post-editor__button" type="submit">${mode === "create" ? "Create Post" : "Save to GitHub"}</button>
-        <button class="post-editor__ghost" type="button" data-editor-preview-toggle>Preview</button>
         <span class="post-editor__status" data-editor-status></span>
+        <button class="post-editor__ghost" type="button" data-editor-preview-toggle>Preview</button>
+        <button class="post-editor__button" type="submit">${mode === "create" ? "Create Post" : "Save to GitHub"}</button>
       </div>
     </form>
   `;
@@ -979,12 +984,17 @@ function renderOwnerToolbar(session) {
   }
   toolbar.dataset.editorToolbar = "true";
   const actions = postShell
-    ? '<button type="button" data-editor-edit>Edit</button><button type="button" data-editor-delete>Delete</button>'
-    : '<button type="button" data-editor-new>New Post</button>';
+    ? '<button class="owner-toolbar__button" type="button" data-editor-edit>Edit</button><button class="owner-toolbar__button owner-toolbar__button--danger" type="button" data-editor-delete>Delete</button>'
+    : '<button class="owner-toolbar__button" type="button" data-editor-new>New Post</button>';
   toolbar.innerHTML = `
-    <span>${escapeHtml(session.login)}</span>
-    ${actions}
-    <a href="/api/auth/logout">Sign out</a>
+    <div class="owner-toolbar__identity">
+      <span>owner mode</span>
+      <strong>${escapeHtml(session.login)}</strong>
+    </div>
+    <div class="owner-toolbar__actions">
+      ${actions}
+      <a class="owner-toolbar__link" href="/api/auth/logout">Sign out</a>
+    </div>
   `;
   toolbar.querySelector("[data-editor-edit]")?.addEventListener("click", openPostEditor);
   toolbar.querySelector("[data-editor-delete]")?.addEventListener("click", deleteCurrentPost);
