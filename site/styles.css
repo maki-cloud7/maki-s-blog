@@ -4496,8 +4496,8 @@ body.is-scrolling .hero::after {
 /* v6.6 redesigned guestbook board */
 .guestbook-board {
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(280px, 1.08fr);
-  gap: clamp(18px, 3vw, 30px);
+  grid-template-columns: 1fr;
+  gap: clamp(12px, 2vw, 18px);
   align-items: stretch;
   border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
   border-radius: calc(var(--radius) + 10px);
@@ -4508,43 +4508,13 @@ body.is-scrolling .hero::after {
   padding: clamp(18px, 3vw, 30px);
 }
 
-.guestbook-brief,
 .guestbook-protocol {
   min-width: 0;
 }
 
-.guestbook-brief {
-  display: grid;
-  align-content: start;
-  gap: clamp(14px, 2vw, 20px);
-  border-radius: var(--radius);
-  background: color-mix(in srgb, var(--color-bg) 66%, transparent);
-  padding: clamp(18px, 2.8vw, 28px);
-}
-
-.guestbook-kicker {
-  width: fit-content;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
-  padding: 7px 10px;
-  color: var(--color-accent);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 850;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.guestbook-brief p {
-  max-width: 28ch;
-  margin: 0;
-  color: var(--color-text);
-  font-size: clamp(18px, 2.2vw, 28px);
-  line-height: 1.42;
-}
-
 .guestbook-protocol {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-content: start;
   gap: 10px;
 }
@@ -4617,16 +4587,8 @@ body.is-scrolling .hero::after {
 }
 
 @media (max-width: 820px) {
-  .guestbook-board {
-    grid-template-columns: 1fr;
-  }
-
   .guestbook-protocol {
-    border-left: 0;
-  }
-
-  .guestbook-protocol div {
-    padding: 16px;
+    grid-template-columns: 1fr;
   }
 }
 
