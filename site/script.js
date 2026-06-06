@@ -1003,7 +1003,7 @@ function normalizeDateTimeInput(value = "") {
 function buildNewPostPath(form) {
   const data = collectEditorData(form);
   const date = (data.date || todayIsoDate()).slice(0, 10);
-  return `site/content/posts/${date}-${slugifyPost(data.title)}.md`;
+  return `site/content/posts/${date}-${slugifyPost(data.title)}-${Date.now().toString(36)}.md`;
 }
 
 function slugifyUploadName(name = "") {
@@ -1050,6 +1050,16 @@ function markdownPreview(markdown = "") {
       if (!text) {
         return "";
       }
+      if (/^```/.test(text)) {
+        const match = text.match(/^```(\S+)?\n([\s\S]*?)\n?```$/);
+        return match ? `<pre><code>${escapeHtml(match[2])}</code></pre>` : `<pre><code>${escapeHtml(text)}</code></pre>`;
+      }
+      if (/^---+$/.test(text)) {
+        return "<hr />";
+      }
+      if (text.startsWith("# ")) {
+        return `<h2>${escapeHtml(text.slice(2))}</h2>`;
+      }
       if (text.startsWith("## ")) {
         return `<h2>${escapeHtml(text.slice(3))}</h2>`;
       }
@@ -1065,6 +1075,12 @@ function markdownPreview(markdown = "") {
       }
       if (text.split("\n").every((line) => /^-\s+/.test(line))) {
         return `<ul>${text.split("\n").map((line) => `<li>${escapeHtml(line.replace(/^-\s+/, ""))}</li>`).join("")}</ul>`;
+      }
+      if (text.split("\n").every((line) => /^\d+\.\s+/.test(line))) {
+        return `<ol>${text.split("\n").map((line) => `<li>${escapeHtml(line.replace(/^\d+\.\s+/, ""))}</li>`).join("")}</ol>`;
+      }
+      if (text.split("\n").every((line) => /^>\s?/.test(line))) {
+        return `<blockquote>${text.split("\n").map((line) => `<p>${escapeHtml(line.replace(/^>\s?/, ""))}</p>`).join("")}</blockquote>`;
       }
       return `<p>${escapeHtml(text).replace(/\n/g, "<br />")}</p>`;
     })

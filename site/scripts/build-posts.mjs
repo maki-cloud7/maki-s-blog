@@ -129,12 +129,33 @@ function markdownToHtml(markdown) {
       return;
     }
 
+    if (lines.every((line) => /^\d+\.\s+/.test(line))) {
+      closeList();
+      html.push("<ol>");
+      lines.forEach((line) => {
+        html.push(`<li>${formatInline(line.replace(/^\d+\.\s+/, ""))}</li>`);
+      });
+      html.push("</ol>");
+      return;
+    }
+
+    if (lines.every((line) => /^>\s?/.test(line))) {
+      closeList();
+      html.push(`<blockquote>${lines.map((line) => `<p>${formatInline(line.replace(/^>\s?/, ""))}</p>`).join("")}</blockquote>`);
+      return;
+    }
+
     closeList();
     const text = block.trim();
     if (!text) {
       return;
     }
-    if (text.startsWith("### ")) {
+    if (/^---+$/.test(text)) {
+      html.push("<hr />");
+    } else if (text.startsWith("#### ")) {
+      const heading = text.slice(5);
+      html.push(`<h4 id="${uniqueHeadingId(heading)}">${formatInline(heading)}</h4>`);
+    } else if (text.startsWith("### ")) {
       const heading = text.slice(4);
       html.push(`<h3 id="${uniqueHeadingId(heading)}">${formatInline(heading)}</h3>`);
     } else if (text.startsWith("## ")) {

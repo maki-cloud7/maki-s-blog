@@ -871,7 +871,8 @@ body.is-scrolling .hero::after {
 }
 
 .post-content h2,
-.post-content h3 {
+.post-content h3,
+.post-content h4 {
   margin: 28px 0 0;
   line-height: 1.18;
   letter-spacing: 0;
@@ -885,15 +886,39 @@ body.is-scrolling .hero::after {
   font-size: clamp(21px, 3vw, 28px);
 }
 
+.post-content h4 {
+  font-size: clamp(18px, 2.4vw, 22px);
+}
+
 .post-content p,
-.post-content ul {
+.post-content ul,
+.post-content ol,
+.post-content blockquote,
+.post-content hr {
   margin: 0;
 }
 
-.post-content ul {
+.post-content ul,
+.post-content ol {
   display: grid;
   gap: 8px;
   padding-left: 1.2em;
+}
+
+.post-content blockquote {
+  border-left: 3px solid var(--color-accent);
+  padding: 8px 0 8px 18px;
+  color: var(--color-muted);
+}
+
+.post-content blockquote p + p {
+  margin-top: 8px;
+}
+
+.post-content hr {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent);
 }
 
 .post-content li::marker {
