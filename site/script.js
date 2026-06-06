@@ -1686,38 +1686,67 @@ window.addEventListener("keydown", (event) => {
       });
     }
 
-    const signalColor = isDark() ? "rgba(255,55,55,0.42)" : "rgba(225,25,25,0.38)";
-    const mutedColor = isDark() ? "rgba(244,243,238,0.09)" : "rgba(16,16,16,0.075)";
-    const originX = width * 0.18;
-    const originY = height * 0.34;
-    const routes = [
-      `M ${originX},${originY} C ${width * 0.34},${height * 0.18} ${width * 0.5},${height * 0.18} ${width * 0.68},${height * 0.34} S ${width * 0.88},${height * 0.54} ${width * 1.04},${height * 0.42}`,
-      `M ${width * -0.04},${height * 0.72} C ${width * 0.18},${height * 0.66} ${width * 0.26},${height * 0.5} ${width * 0.42},${height * 0.54} S ${width * 0.72},${height * 0.78} ${width * 0.98},${height * 0.62}`,
-      `M ${width * 0.58},${height * -0.04} L ${width * 0.46},${height * 0.26} L ${width * 0.54},${height * 0.48} L ${width * 0.38},${height * 0.9}`,
-    ];
+    const phi = (1 + Math.sqrt(5)) / 2;
+    const accentColor = isDark() ? "rgba(255,55,55,0.34)" : "rgba(225,25,25,0.3)";
+    const guideColor = isDark() ? "rgba(244,243,238,0.11)" : "rgba(16,16,16,0.09)";
+    const quietColor = isDark() ? "rgba(244,243,238,0.06)" : "rgba(16,16,16,0.05)";
+    const rectW = Math.min(width * 0.72, height * phi * 0.82);
+    const rectH = rectW / phi;
+    const rectX = width * 0.5 - rectW * 0.46;
+    const rectY = height * 0.5 - rectH * 0.52;
+    const splitX = rectX + rectW / phi;
+    const splitY = rectY + rectH / phi;
 
-    routes.forEach((route, index) => {
-      const routePath = document.createElementNS(NS, "path");
-      routePath.setAttribute("d", route);
-      routePath.setAttribute("stroke", index === 2 ? mutedColor : signalColor);
-      routePath.setAttribute("stroke-width", index === 1 ? "2" : "1.4");
-      routePath.setAttribute("stroke-dasharray", index === 2 ? "14 24" : "80 34 8 34");
-      routePath.setAttribute("opacity", index === 0 ? "0.78" : "0.56");
-      signalGroup.appendChild(routePath);
-    });
+    const addPath = (d, stroke, strokeWidth = 1, opacity = 1, dash = "") => {
+      const path = document.createElementNS(NS, "path");
+      path.setAttribute("d", d);
+      path.setAttribute("stroke", stroke);
+      path.setAttribute("stroke-width", strokeWidth);
+      path.setAttribute("opacity", opacity);
+      if (dash) {
+        path.setAttribute("stroke-dasharray", dash);
+      }
+      signalGroup.appendChild(path);
+    };
+
+    const addRect = (x, y, rectWidth, rectHeight, stroke, opacity = 1) => {
+      const rect = document.createElementNS(NS, "rect");
+      rect.setAttribute("x", x);
+      rect.setAttribute("y", y);
+      rect.setAttribute("width", rectWidth);
+      rect.setAttribute("height", rectHeight);
+      rect.setAttribute("stroke", stroke);
+      rect.setAttribute("stroke-width", "1");
+      rect.setAttribute("opacity", opacity);
+      signalGroup.appendChild(rect);
+    };
+
+    addRect(rectX, rectY, rectW, rectH, guideColor, 0.86);
+    addRect(rectX, rectY, rectW / phi, rectH, quietColor, 0.8);
+    addRect(splitX, rectY, rectW - rectW / phi, rectH / phi, quietColor, 0.72);
+    addRect(splitX, splitY, (rectW - rectW / phi) / phi, rectH - rectH / phi, quietColor, 0.64);
+    addPath(`M ${rectX},${rectY + rectH} L ${rectX + rectW},${rectY}`, guideColor, 1, 0.7, "10 18");
+    addPath(`M ${rectX},${rectY} L ${rectX + rectW},${rectY + rectH}`, quietColor, 1, 0.6, "4 18");
+    addPath(`M ${splitX},${rectY} L ${splitX},${rectY + rectH}`, accentColor, 1.4, 0.86);
+    addPath(`M ${rectX},${splitY} L ${rectX + rectW},${splitY}`, accentColor, 1.1, 0.58);
+
+    const arcSize = rectH;
+    addPath(`M ${rectX},${rectY + rectH} A ${arcSize},${arcSize} 0 0 1 ${rectX + arcSize},${rectY}`, accentColor, 1.6, 0.78);
+    addPath(`M ${splitX},${rectY} A ${rectW - rectW / phi},${rectW - rectW / phi} 0 0 1 ${rectX + rectW},${splitY}`, guideColor, 1, 0.66);
+    addPath(`M ${rectX + rectW},${splitY} A ${(rectH - rectH / phi)},${(rectH - rectH / phi)} 0 0 1 ${splitX},${rectY + rectH}`, guideColor, 1, 0.48);
 
     [
-      [originX, originY, 5],
-      [width * 0.42, height * 0.54, 4],
-      [width * 0.68, height * 0.34, 6],
-      [width * 0.54, height * 0.48, 4],
+      [splitX, rectY, 4],
+      [splitX, splitY, 5],
+      [rectX + rectW / phi / phi, splitY, 3],
+      [rectX + rectW, rectY + rectH, 3],
     ].forEach(([cx, cy, radius]) => {
       const node = document.createElementNS(NS, "circle");
       node.setAttribute("cx", cx);
       node.setAttribute("cy", cy);
       node.setAttribute("r", radius);
       node.setAttribute("fill", isDark() ? "#11110f" : "#f7f7f4");
-      node.setAttribute("stroke", signalColor);
+      node.setAttribute("stroke", accentColor);
       node.setAttribute("stroke-width", "1.5");
       signalGroup.appendChild(node);
     });
