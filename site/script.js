@@ -7,10 +7,10 @@ const copy = {
     "nav.guestbook": "留言板",
     "nav.about": "关于",
     "hero.kicker": "personal blog / notes / tiny experiments",
-    "hero.intro": "这里是 maki 的个人博客，用来记录技术、想法、作品和生活。",
+    "hero.intro": "为美好的世界献上祝福！",
     "hero.scroll": "阅读文章",
     "home.profile.title": "写代码，也写生活",
-    "home.profile.bio": "我喜欢把技术、想法、作品和生活片段整理成可回访的笔记。这里会慢慢长成一个安静、清晰、有一点 playful 的个人空间。",
+    "home.profile.bio": "迷茫地不知道写什么介绍自己",
     "home.profile.link": "了解 maki →",
     "home.writing.title": "最近文章",
     "home.writing.more": "阅读更多文章 →",
@@ -62,13 +62,13 @@ const copy = {
     "about.card.tech.title": "技术",
     "about.card.tech.text": "喜欢把界面、系统和小工具做得清楚顺手。",
     "about.card.music.title": "音乐",
-    "about.card.music.text": "适合写代码时循环播放的背景。",
+    "about.card.music.text": "钟爱摇滚，想在未来开一家唱片店。",
     "about.card.gaming.title": "游戏",
-    "about.card.gaming.text": "从反馈、节奏和系统里学习交互。",
+    "about.card.gaming.text": "喜欢和朋友一起玩休闲游戏，也喜欢独立单机游戏。",
     "about.card.movies.title": "电影",
     "about.card.movies.text": "故事、镜头和情绪，是另一种笔记。",
     "about.card.design.title": "设计",
-    "about.card.design.text": "克制，但不要无聊。白、黑、细线和一点红。",
+    "about.card.design.text": "梦想做一个前端工程师，喜欢丰富的视觉体验。",
     "about.card.photography.title": "摄影",
     "about.card.photography.text": "收集日常里的光、影和小小证据。",
     "about.card.kendo.title": "剑道",
@@ -190,7 +190,6 @@ const phraseSets = {
   en: ["Hi, I'm maki", "你好，我是 maki", "Notes, ideas, and experiments", "Writing code, and writing life"],
 };
 
-const typewriter = document.querySelector(".typewriter");
 const ambientGlow = document.querySelector(".ambient-glow");
 const hero = document.querySelector(".hero");
 const heroKinetic = document.querySelector("[data-hero-kinetic]");
@@ -206,21 +205,8 @@ const articleCount = document.querySelector("[data-article-count]");
 const emptyArticles = document.querySelector("[data-empty-articles]");
 const clearArticles = document.querySelector("[data-clear-articles]");
 const tagButtons = Array.from(document.querySelectorAll("[data-filter-tag]"));
-const blogTools = document.querySelector(".blog-tools");
-const aboutCards = Array.from(document.querySelectorAll("[data-about-card]"));
-const revealItems = Array.from(document.querySelectorAll(".reveal-on-scroll"));
-const pageSections = Array.from(document.querySelectorAll("[data-page-section]"));
-const railLinks = Array.from(document.querySelectorAll("[data-rail-link]"));
-const postToc = document.querySelector("[data-post-toc]");
-const innerPage = document.querySelector(".inner-page");
-const spotlightCards = Array.from(document.querySelectorAll(".composition-card, .friend-card, .project-card, .profile-card, .article-item, .guestbook-panel, .guestbook-signal"));
-const localClock = document.querySelector("[data-local-clock]");
-const postShell = document.querySelector("[data-post-source]");
-const postContent = document.querySelector(".post-content");
-const codeBlocks = Array.from(document.querySelectorAll("[data-code-block], .post-content pre"));
-const giscusSlot = document.querySelector("[data-giscus-comments]");
-const postViewCount = document.querySelector("[data-post-view-count]");
-const isArticleIndex = Boolean(document.querySelector(".article-list--archive"));
+const musicCardPlay = document.querySelector("[data-music-card-play]");
+const musicCardNext = document.querySelector("[data-music-card-next]");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 let phraseIndex = 0;
@@ -247,6 +233,11 @@ let lastKnobRotation = -1;
 let editorSession = null;
 let editorSource = null;
 let editorSha = null;
+const ownerRememberKey = "maki-owner-access";
+
+function getTypewriter() {
+  return document.querySelector(".typewriter");
+}
 
 function escapeHtml(value = "") {
   return String(value)
@@ -257,19 +248,21 @@ function escapeHtml(value = "") {
 }
 
 function updateHeroPointer(event) {
-  if (!hero) {
+  const currentHero = document.querySelector(".hero");
+  const currentHeroKinetic = document.querySelector("[data-hero-kinetic]");
+  if (!currentHero) {
     return;
   }
 
-  const rect = hero.getBoundingClientRect();
+  const rect = currentHero.getBoundingClientRect();
   const x = Math.min(100, Math.max(0, ((event.clientX - rect.left) / rect.width) * 100));
   const y = Math.min(100, Math.max(0, ((event.clientY - rect.top) / rect.height) * 100));
   document.body.style.setProperty("--hero-pointer-x", `${x}%`);
   document.body.style.setProperty("--hero-pointer-y", `${y}%`);
 
-  if (heroKinetic) {
-    heroKinetic.style.setProperty("--kinetic-x", ((x - 50) / 50).toFixed(3));
-    heroKinetic.style.setProperty("--kinetic-y", ((y - 50) / 50).toFixed(3));
+  if (currentHeroKinetic) {
+    currentHeroKinetic.style.setProperty("--kinetic-x", ((x - 50) / 50).toFixed(3));
+    currentHeroKinetic.style.setProperty("--kinetic-y", ((y - 50) / 50).toFixed(3));
   }
 }
 
@@ -288,10 +281,12 @@ function scheduleHeroPointerUpdate(event) {
 }
 
 function updateHeroScroll() {
-  if (!hero) {
+  const currentHero = document.querySelector(".hero");
+  if (!currentHero) {
     return;
   }
 
+  heroScrollHeight = currentHero.offsetHeight || 1;
   const progress = Math.min(1, Math.max(0, window.scrollY / Math.max(1, heroScrollHeight)));
   if (Math.abs(progress - lastHeroScrollProgress) < 0.004 && progress !== 0 && progress !== 1) {
     return;
@@ -304,7 +299,7 @@ function updateHeroScroll() {
 function updateScrollDrivenState() {
   scrollFrame = 0;
   updateHeroScroll();
-  if (innerPage) {
+  if (document.querySelector(".inner-page")) {
     updateScrollProgress();
   }
   updateRotaryFromScroll();
@@ -320,7 +315,7 @@ function scheduleScrollDrivenState({ refreshLayout = false } = {}) {
   }, 140);
 
   if (refreshLayout) {
-    heroScrollHeight = hero?.offsetHeight || 1;
+    heroScrollHeight = document.querySelector(".hero")?.offsetHeight || 1;
   }
 
   if (scrollFrame) {
@@ -425,31 +420,41 @@ function initRotaryKnob() {
 }
 
 function updateLocalClock() {
-  if (!localClock) {
+  const clocks = document.querySelectorAll("[data-local-clock]");
+  if (!clocks.length) {
     return;
   }
 
-  localClock.textContent = new Intl.DateTimeFormat(currentLang === "zh" ? "zh-CN" : "en-US", {
+  const time = new Intl.DateTimeFormat(currentLang === "zh" ? "zh-CN" : "en-US", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
     timeZone: "Asia/Tokyo",
   }).format(new Date());
+
+  clocks.forEach((clock) => {
+    clock.textContent = time;
+  });
 }
 
 function updateTechClock() {
-  if (!techClock) {
+  const clocks = document.querySelectorAll("[data-tech-clock]");
+  if (!clocks.length) {
     return;
   }
 
-  techClock.textContent = `[UTC+09 // ${new Intl.DateTimeFormat("en-US", {
+  const time = `[UTC+09 // ${new Intl.DateTimeFormat("en-US", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
     timeZone: "Asia/Tokyo",
   }).format(new Date())}]`;
+
+  clocks.forEach((clock) => {
+    clock.textContent = time;
+  });
 }
 
 function getPreferredTheme() {
@@ -485,9 +490,10 @@ function applyLanguage(lang) {
     langToggle.setAttribute("aria-label", lang === "zh" ? "Switch to English" : "切换到中文");
   }
 
-  if (articleSearch) {
-    articleSearch.placeholder = lang === "zh" ? "搜索标题、摘要或标签" : "Search titles, summaries, or tags";
-    articleSearch.setAttribute("aria-label", lang === "zh" ? "搜索文章" : "Search articles");
+  const currentArticleSearch = document.querySelector("[data-article-search]");
+  if (currentArticleSearch) {
+    currentArticleSearch.placeholder = lang === "zh" ? "搜索文章、摘要或标签..." : "Search posts, summaries, or tags...";
+    currentArticleSearch.setAttribute("aria-label", lang === "zh" ? "搜索文章" : "Search articles");
   }
 
   document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
@@ -528,6 +534,7 @@ function createAnimatedToken(token, indexOffset) {
 }
 
 function renderHeroPhrase(phrase) {
+  const typewriter = getTypewriter();
   if (!typewriter) {
     return;
   }
@@ -553,13 +560,18 @@ function renderHeroPhrase(phrase) {
 }
 
 function scheduleHeroPhrase() {
-  if (!typewriter || reduceMotion) {
+  if (!getTypewriter() || reduceMotion) {
     return;
   }
 
   window.clearTimeout(phraseTimer);
   window.clearTimeout(phraseExitTimer);
   phraseTimer = window.setTimeout(() => {
+    const typewriter = getTypewriter();
+    if (!typewriter) {
+      return;
+    }
+
     const currentChars = Array.from(typewriter.querySelectorAll(".word-char"));
     currentChars.forEach((char) => char.classList.add("is-exiting"));
     const exitDuration = currentChars.length ? 560 + (currentChars.length - 1) * 18 : 0;
@@ -575,6 +587,10 @@ function scheduleHeroPhrase() {
 function resetTypewriter() {
   window.clearTimeout(phraseTimer);
   window.clearTimeout(phraseExitTimer);
+  if (!getTypewriter()) {
+    return;
+  }
+
   phraseIndex = 0;
   renderHeroPhrase(phraseSets[currentLang][phraseIndex]);
   scheduleHeroPhrase();
@@ -621,10 +637,8 @@ function initKineticAtmosphere() {
       cancelAnimationFrame(heroPointerFrame);
       heroPointerFrame = 0;
     }
-    if (heroKinetic) {
-      heroKinetic.style.setProperty("--kinetic-x", "0");
-      heroKinetic.style.setProperty("--kinetic-y", "0");
-    }
+    document.querySelector("[data-hero-kinetic]")?.style.setProperty("--kinetic-x", "0");
+    document.querySelector("[data-hero-kinetic]")?.style.setProperty("--kinetic-y", "0");
   });
   if (ambientGlow) {
     requestAnimationFrame(updateAmbientFrame);
@@ -637,28 +651,692 @@ updateLocalClock();
 updateTechClock();
 initKineticAtmosphere();
 initRotaryKnob();
+
+function initLocalMusicPlayer() {
+  const header = document.querySelector(".site-header");
+  const player = document.createElement("aside");
+  player.className = "site-music";
+  player.dataset.siteMusic = "";
+  player.dataset.playing = "false";
+  player.innerHTML = `
+    <button class="site-music__play" type="button" data-music-play aria-label="播放或暂停">
+      <svg data-music-icon-play viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8 5v14l11-7Z" />
+      </svg>
+      <svg data-music-icon-pause viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8 5v14M16 5v14" />
+      </svg>
+    </button>
+    <div class="site-music__body">
+      <strong data-music-title>加载音乐库</strong>
+      <small data-music-detail>正在读取本地网站音乐</small>
+    </div>
+    <label class="site-music__progress" aria-label="播放进度">
+      <input type="range" min="0" max="1000" value="0" step="1" data-music-progress />
+    </label>
+    <div class="site-music__actions">
+      <button type="button" data-music-next aria-label="下一首">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 5v14l10-7Z" />
+          <path d="M19 5v14" />
+        </svg>
+      </button>
+    </div>
+    <audio data-music-audio preload="none"></audio>
+  `;
+  if (header) {
+    header.insertAdjacentElement("afterend", player);
+  } else {
+    document.body.prepend(player);
+  }
+
+  const audio = player.querySelector("[data-music-audio]");
+  const playButton = player.querySelector("[data-music-play]");
+  const nextButton = player.querySelector("[data-music-next]");
+  const progress = player.querySelector("[data-music-progress]");
+  const title = player.querySelector("[data-music-title]");
+  const detail = player.querySelector("[data-music-detail]");
+  const stateKey = "maki-music-state";
+  let tracks = [];
+  let currentTrack = -1;
+  let shouldResume = false;
+  let pendingAutoplay = false;
+
+  if (!audio || !playButton || !title || !detail) {
+    return;
+  }
+
+  const readState = () => {
+    try {
+      return JSON.parse(localStorage.getItem(stateKey) || "{}");
+    } catch {
+      return {};
+    }
+  };
+  const writeState = () => {
+    const track = tracks[currentTrack];
+    if (!track) {
+      return;
+    }
+
+    localStorage.setItem(
+      stateKey,
+      JSON.stringify({
+        src: track.src,
+        time: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
+        playing: !audio.paused,
+        updatedAt: Date.now()
+      })
+    );
+  };
+  const cleanName = (name = "") => name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim() || name;
+  const syncDisplay = () => {
+    if (!tracks.length || currentTrack < 0) {
+      return;
+    }
+
+    const track = tracks[currentTrack];
+    title.textContent = track.title || cleanName(track.src.split("/").pop() || "");
+    detail.textContent = track.artist ? `${track.artist} · ${currentTrack + 1} / ${tracks.length}` : `${currentTrack + 1} / ${tracks.length}`;
+
+    document.querySelectorAll("[data-music-card-title]").forEach((node) => {
+      node.textContent = title.textContent;
+    });
+
+    const cardDetails = Array.from(document.querySelectorAll("[data-music-card-detail]"));
+    if (cardDetails.length) {
+      const state = player.dataset.playing === "true" ? "正在播放" : "已暂停";
+      const cardText = `${state} · ${detail.textContent}`;
+      cardDetails.forEach((node) => {
+        node.textContent = cardText;
+      });
+    }
+
+  };
+  const syncProgress = () => {
+    if (!progress || !Number.isFinite(audio.duration) || audio.duration <= 0) {
+      return;
+    }
+
+    const value = Math.round((audio.currentTime / audio.duration) * 1000);
+    const percent = `${(audio.currentTime / audio.duration) * 100}%`;
+    progress.value = String(value);
+    progress.style.setProperty("--progress", percent);
+    document.querySelectorAll("[data-music-card-progress]").forEach((input) => {
+      input.value = String(value);
+      input.style.setProperty("--progress", percent);
+    });
+  };
+  const playWhenAllowed = ({ mutedStart = false } = {}) => {
+    pendingAutoplay = false;
+    if (mutedStart) {
+      audio.muted = true;
+    }
+    audio.play().then(() => {
+      if (!mutedStart) {
+        return;
+      }
+      window.setTimeout(() => {
+        audio.muted = false;
+        audio.volume = 1;
+      }, 120);
+    }).catch(() => {
+      pendingAutoplay = true;
+      const currentDetail = detail.textContent;
+      detail.textContent = "点击页面后开始播放";
+      document.querySelectorAll("[data-music-card-detail]").forEach((node) => {
+        const trackDetail = currentDetail ? ` · ${currentDetail}` : "";
+        node.textContent = `点击页面后开始播放${trackDetail}`;
+      });
+    });
+  };
+
+  const setTrack = (index, shouldPlay = false, startTime = 0) => {
+    if (!tracks.length) {
+      return;
+    }
+
+    currentTrack = (index + tracks.length) % tracks.length;
+    const track = tracks[currentTrack];
+    audio.src = track.src;
+    const targetTime = Math.max(0, startTime || 0);
+    if (targetTime > 0) {
+      audio.addEventListener(
+        "loadedmetadata",
+        () => {
+          audio.currentTime = Math.min(targetTime, audio.duration || targetTime);
+        },
+        { once: true }
+      );
+    }
+    player.dataset.playing = "false";
+    syncDisplay();
+
+    if (shouldPlay) {
+      playWhenAllowed({ mutedStart: true });
+    }
+  };
+
+  const togglePlayback = () => {
+    if (!tracks.length) {
+      return;
+    }
+
+    if (audio.paused) {
+      audio.play();
+    } else {
+      audio.pause();
+    }
+  };
+  const nextTrack = () => setTrack(currentTrack + 1, true);
+  playButton.addEventListener("click", togglePlayback);
+  nextButton?.addEventListener("click", nextTrack);
+  progress?.addEventListener("input", () => {
+    if (!Number.isFinite(audio.duration) || audio.duration <= 0) {
+      return;
+    }
+
+    audio.currentTime = (Number(progress.value) / 1000) * audio.duration;
+    syncProgress();
+    writeState();
+  });
+  document.addEventListener("input", (event) => {
+    const cardProgress = event.target.closest("[data-music-card-progress]");
+    if (!cardProgress || !Number.isFinite(audio.duration) || audio.duration <= 0) {
+      return;
+    }
+
+    audio.currentTime = (Number(cardProgress.value) / 1000) * audio.duration;
+    syncProgress();
+    writeState();
+  });
+  document.addEventListener("click", (event) => {
+    if (event.target.closest("[data-music-card-play]")) {
+      togglePlayback();
+    } else if (event.target.closest("[data-music-card-next]")) {
+      nextTrack();
+    }
+  });
+  document.addEventListener("pointerdown", () => {
+    if (pendingAutoplay && audio.paused && tracks.length) {
+      audio.muted = false;
+      playWhenAllowed();
+    } else if (audio.muted) {
+      audio.muted = false;
+      audio.volume = 1;
+    }
+  }, { once: false });
+  audio.addEventListener("play", () => {
+    player.dataset.playing = "true";
+    document.body.dataset.musicPlaying = "true";
+    document.querySelectorAll(".composition-widget--music").forEach((card) => {
+      card.dataset.playing = "true";
+    });
+    shouldResume = true;
+    writeState();
+    syncDisplay();
+  });
+  audio.addEventListener("pause", () => {
+    player.dataset.playing = "false";
+    document.body.dataset.musicPlaying = "false";
+    document.querySelectorAll(".composition-widget--music").forEach((card) => {
+      card.dataset.playing = "false";
+    });
+    shouldResume = false;
+    writeState();
+    syncDisplay();
+  });
+  audio.addEventListener("timeupdate", writeState);
+  audio.addEventListener("timeupdate", syncProgress);
+  audio.addEventListener("loadedmetadata", syncProgress);
+  window.addEventListener("pagehide", writeState);
+  audio.addEventListener("ended", () => setTrack(currentTrack + 1, true));
+  window.makiMusicSync = () => {
+    syncDisplay();
+    syncProgress();
+  };
+
+  fetch("/content/playlist.json")
+    .then((response) => (response.ok ? response.json() : []))
+    .then((playlist) => {
+      tracks = Array.isArray(playlist) ? playlist.filter((track) => track && track.src) : [];
+
+      if (!tracks.length) {
+        title.textContent = "音乐库为空";
+        detail.textContent = "把音频放入 assets/audio 并更新 playlist.json";
+        document.querySelectorAll("[data-music-card-title]").forEach((node) => {
+          node.textContent = "音乐库为空";
+        });
+        document.querySelectorAll("[data-music-card-detail]").forEach((node) => {
+          node.textContent = "把音频放入 assets/audio 并更新 playlist.json";
+        });
+        return;
+      }
+
+      currentTrack = 0;
+      syncDisplay();
+
+      const savedState = readState();
+      const savedIndex = tracks.findIndex((track) => track.src === savedState.src);
+      const resumeIndex = savedIndex >= 0 ? savedIndex : 0;
+      const resumeTime = savedIndex >= 0 ? Number(savedState.time || 0) : 0;
+      const recentlyActive = Date.now() - Number(savedState.updatedAt || 0) < 10 * 60 * 1000;
+      shouldResume = savedState.playing === true && recentlyActive;
+
+      setTrack(resumeIndex, true, resumeTime);
+    })
+    .catch(() => {
+      title.textContent = "音乐库未配置";
+      detail.textContent = "检查 content/playlist.json";
+      document.querySelectorAll("[data-music-card-title]").forEach((node) => {
+        node.textContent = "音乐库未配置";
+      });
+      document.querySelectorAll("[data-music-card-detail]").forEach((node) => {
+        node.textContent = "检查 content/playlist.json";
+      });
+    });
+}
+
+function refreshActiveNav() {
+  document.querySelectorAll(".nav-link").forEach((link) => {
+    const linkPath = new URL(link.getAttribute("href"), window.location.href).pathname;
+    const currentPath = window.location.pathname.endsWith("/") ? `${window.location.pathname}index.html` : window.location.pathname;
+
+    link.classList.toggle("is-active", linkPath === currentPath || (linkPath.endsWith("/index.html") && currentPath.endsWith("/")));
+    if (link.classList.contains("is-active")) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
+function getInternalPageUrl(link) {
+  const href = link.getAttribute("href") || "";
+  const rootPages = new Set(["index.html", "articles.html", "projects.html", "friends.html", "guestbook.html", "about.html", "404.html"]);
+  const [pathPart, hashPart = ""] = href.split("#");
+
+  if (rootPages.has(pathPart)) {
+    return new URL(`/${pathPart}${hashPart ? `#${hashPart}` : ""}`, window.location.origin);
+  }
+
+  return new URL(href, window.location.href);
+}
+
+function initPartialNavigation() {
+  if (!window.DOMParser || !window.history?.pushState) {
+    return;
+  }
+
+  const pageCache = new Map();
+  const pendingPages = new Map();
+  const maxCachedPages = 24;
+  const getPageKey = (url) => `${url.origin}${url.pathname}${url.search}`;
+
+  const canLoadInline = (url, link) => {
+    if (!link.closest(".site-nav, main, .site-footer, .brand")) {
+      return false;
+    }
+    if (url.origin !== window.location.origin || link.target || link.hasAttribute("download")) {
+      return false;
+    }
+    if (url.hash && url.pathname === window.location.pathname) {
+      return false;
+    }
+    return url.pathname === "/" || url.pathname.endsWith(".html");
+  };
+
+  const rememberPage = (key, html) => {
+    if (pageCache.has(key)) {
+      pageCache.delete(key);
+    }
+    pageCache.set(key, html);
+    while (pageCache.size > maxCachedPages) {
+      pageCache.delete(pageCache.keys().next().value);
+    }
+  };
+
+  const fetchPageHtml = async (url, { timeoutMs = 8000 } = {}) => {
+    const key = getPageKey(url);
+    if (pageCache.has(key)) {
+      return pageCache.get(key);
+    }
+    if (pendingPages.has(key)) {
+      return pendingPages.get(key);
+    }
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+    const request = fetch(url.href, {
+      headers: { "X-Requested-With": "fetch" },
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Page request failed");
+        }
+        return response.text();
+      })
+      .then((html) => {
+        rememberPage(key, html);
+        return html;
+      })
+      .finally(() => {
+        window.clearTimeout(timeout);
+        pendingPages.delete(key);
+      });
+
+    pendingPages.set(key, request);
+    return request;
+  };
+
+  const prefetchPage = (url) => {
+    if (url.origin !== window.location.origin || (url.pathname === window.location.pathname && url.search === window.location.search)) {
+      return;
+    }
+    fetchPageHtml(url, { timeoutMs: 12000 }).catch(() => {});
+  };
+
+  const prefetchVisibleLinks = () => {
+    const seen = new Set();
+    document.querySelectorAll("a[href]").forEach((link) => {
+      let url;
+      try {
+        url = getInternalPageUrl(link);
+      } catch {
+        return;
+      }
+      if (!canLoadInline(url, link)) {
+        return;
+      }
+      const key = getPageKey(url);
+      if (seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      prefetchPage(url);
+    });
+  };
+
+  const schedulePrefetch = () => {
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(prefetchVisibleLinks, { timeout: 2200 });
+      return;
+    }
+    window.setTimeout(prefetchVisibleLinks, 900);
+  };
+
+  const swapPage = async (url, shouldPush = true) => {
+    document.body.dataset.pageLoading = "true";
+    try {
+      const html = await fetchPageHtml(url);
+      const nextDoc = new DOMParser().parseFromString(html, "text/html");
+      const nextMain = nextDoc.querySelector("main");
+      const nextFooter = nextDoc.querySelector(".site-footer");
+      const currentMain = document.querySelector("main");
+      const currentFooter = document.querySelector(".site-footer");
+
+      if (!nextMain || !currentMain) {
+        window.location.href = url.href;
+        return;
+      }
+
+      document.title = nextDoc.title || document.title;
+      currentMain.replaceWith(nextMain);
+      if (nextFooter && currentFooter) {
+        currentFooter.replaceWith(nextFooter);
+      }
+
+      if (shouldPush) {
+        window.history.pushState({ pjax: true }, "", url.href);
+      }
+
+      refreshActiveNav();
+      applyLanguage(currentLang);
+      hydratePage();
+      window.scrollTo({ top: 0, behavior: "auto" });
+    } catch {
+      window.location.href = url.href;
+    } finally {
+      document.body.dataset.pageLoading = "false";
+    }
+  };
+
+  document.addEventListener("pointerover", (event) => {
+    const link = event.target.closest("a[href]");
+    if (!link) {
+      return;
+    }
+    let url;
+    try {
+      url = getInternalPageUrl(link);
+    } catch {
+      return;
+    }
+    if (canLoadInline(url, link)) {
+      prefetchPage(url);
+    }
+  }, { passive: true });
+
+  document.addEventListener("touchstart", (event) => {
+    const link = event.target.closest("a[href]");
+    if (!link) {
+      return;
+    }
+    let url;
+    try {
+      url = getInternalPageUrl(link);
+    } catch {
+      return;
+    }
+    if (canLoadInline(url, link)) {
+      prefetchPage(url);
+    }
+  }, { passive: true });
+
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("a[href]");
+    if (!link || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return;
+    }
+
+    const url = getInternalPageUrl(link);
+    if (!canLoadInline(url, link)) {
+      return;
+    }
+
+    event.preventDefault();
+    swapPage(url);
+  });
+
+  window.addEventListener("popstate", () => {
+    swapPage(new URL(window.location.href), false);
+  });
+
+  rememberPage(getPageKey(new URL(window.location.href)), document.documentElement.outerHTML);
+}
+
+function initRevealItems() {
+  const items = Array.from(document.querySelectorAll(".reveal-on-scroll"));
+  if (!items.length) {
+    return;
+  }
+
+  if (!reduceMotion && "IntersectionObserver" in window) {
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.16, rootMargin: "0px 0px -8% 0px" },
+    );
+    items.forEach((item) => revealObserver.observe(item));
+    return;
+  }
+
+  items.forEach((item) => item.classList.add("is-visible"));
+}
+
+function initCardMotion() {
+  document.querySelectorAll("[data-about-card]").forEach((card) => {
+    if (card.dataset.tiltBound === "true") {
+      return;
+    }
+
+    card.dataset.tiltBound = "true";
+    card.addEventListener("mousemove", (event) => {
+      if (reduceMotion) {
+        return;
+      }
+
+      const rect = card.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = ((event.clientY - rect.top) / rect.height) * 2 - 1;
+      card.style.setProperty("--tilt-x", String(x));
+      card.style.setProperty("--tilt-y", String(y));
+    });
+    card.addEventListener("mouseleave", () => {
+      card.style.setProperty("--tilt-x", "0");
+      card.style.setProperty("--tilt-y", "0");
+    });
+  });
+
+  document.querySelectorAll(".composition-card, .friend-card, .project-card, .profile-card, .article-item, .guestbook-panel, .guestbook-signal").forEach((card) => {
+    if (card.dataset.spotlightBound === "true") {
+      return;
+    }
+
+    card.dataset.spotlightBound = "true";
+    card.addEventListener("mousemove", (event) => {
+      const rect = card.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      card.style.setProperty("--mouse-x", `${x}px`);
+      card.style.setProperty("--mouse-y", `${y}px`);
+    });
+  });
+}
+
+function initPageRail() {
+  const sections = Array.from(document.querySelectorAll("[data-page-section]"));
+  const links = Array.from(document.querySelectorAll("[data-rail-link]"));
+  if (!sections.length) {
+    document.documentElement.style.setProperty("--section-progress", "0");
+    return;
+  }
+
+  const setActiveSection = (target) => {
+    const id = target.id || target.querySelector("[id]")?.id;
+    if (!id) {
+      return;
+    }
+
+    const index = Math.max(0, sections.indexOf(target));
+    const progress = sections.length > 1 ? index / (sections.length - 1) : 0;
+    document.documentElement.style.setProperty("--section-progress", progress.toFixed(3));
+
+    links.forEach((link) => {
+      const isActive = link.getAttribute("href") === `#${id}`;
+      link.classList.toggle("is-active", isActive);
+      if (isActive) {
+        link.setAttribute("aria-current", "true");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    });
+  };
+
+  if ("IntersectionObserver" in window) {
+    const sectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target);
+          }
+        });
+      },
+      { threshold: 0.42, rootMargin: "-18% 0px -48% 0px" },
+    );
+    sections.forEach((section) => sectionObserver.observe(section));
+  }
+
+  setActiveSection(sections[0]);
+}
+
+function syncHomeChrome() {
+  const isHome = Boolean(document.querySelector("main#home"));
+  let grid = document.getElementById("grid-overlay");
+
+  document.body.classList.toggle("has-home-chrome", isHome);
+  document.querySelector(".ambient-glow")?.toggleAttribute("hidden", !isHome);
+  document.querySelector(".tech-marks")?.toggleAttribute("hidden", !isHome);
+
+  if (!isHome) {
+    if (grid) {
+      grid.hidden = true;
+    }
+    return;
+  }
+
+  if (!grid) {
+    grid = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    grid.id = "grid-overlay";
+    grid.setAttribute("aria-hidden", "true");
+    document.body.insertBefore(grid, document.querySelector(".tech-marks") || document.querySelector(".site-line") || document.body.firstChild);
+  }
+
+  grid.hidden = false;
+  initGridSVG();
+}
+
+function hydratePage() {
+  document.querySelectorAll("[data-filter-tag]").forEach((button) => {
+    const isActive = button.dataset.filterTag === activeTag || (!activeTag && button.dataset.filterTag === "all");
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+  initRevealItems();
+  initPageRail();
+  initCardMotion();
+  syncHomeChrome();
+  updateLocalClock();
+  updateTechClock();
+  updateArticleFilters();
+  initCodeCopyButtons();
+  initPostStats();
+  initReadProgressRecovery();
+  buildPostToc();
+  initGiscus();
+  initOwnerEditor();
+  resetTypewriter();
+  window.makiMusicSync?.();
+  updateScrollDrivenState();
+}
 updateScrollDrivenState();
 
-if (localClock) {
-  window.setInterval(updateLocalClock, 1000);
-}
-
-if (techClock) {
-  window.setInterval(updateTechClock, 1000);
-}
+window.setInterval(updateLocalClock, 1000);
+window.setInterval(updateTechClock, 1000);
 
 window.addEventListener("scroll", () => scheduleScrollDrivenState(), { passive: true });
 window.addEventListener("resize", () => scheduleScrollDrivenState({ refreshLayout: true }), { passive: true });
 
 function updateArticleFilters() {
-  if (!articleItems.length) {
+  const currentArticleItems = Array.from(document.querySelectorAll("[data-article]"));
+  const currentArticleSearch = document.querySelector("[data-article-search]");
+  const currentArticleCount = document.querySelector("[data-article-count]");
+  const currentEmptyArticles = document.querySelector("[data-empty-articles]");
+  if (!currentArticleItems.length) {
     return;
   }
 
-  const query = articleSearch?.value.trim().toLowerCase() || "";
+  const query = currentArticleSearch?.value.trim().toLowerCase() || "";
   let visibleCount = 0;
 
-  articleItems.forEach((item) => {
+  currentArticleItems.forEach((item) => {
     const tags = item.dataset.tags?.split(" ") || [];
     const text = [
       item.dataset.search,
@@ -684,22 +1362,23 @@ function updateArticleFilters() {
     }
   });
 
-  if (articleCount) {
+  if (currentArticleCount) {
     const label = currentLang === "zh" ? `${visibleCount} 篇文章` : `${visibleCount} articles`;
-    articleCount.textContent = label;
+    currentArticleCount.textContent = label;
   }
 
-  if (emptyArticles) {
-    emptyArticles.hidden = visibleCount !== 0;
+  if (currentEmptyArticles) {
+    currentEmptyArticles.hidden = visibleCount !== 0;
   }
 }
 
 function initCodeCopyButtons() {
-  if (!codeBlocks.length) {
+  const currentCodeBlocks = Array.from(document.querySelectorAll("[data-code-block], .post-content pre"));
+  if (!currentCodeBlocks.length) {
     return;
   }
 
-  codeBlocks.forEach((block) => {
+  currentCodeBlocks.forEach((block) => {
     if (block.querySelector(".code-copy-button")) {
       return;
     }
@@ -740,11 +1419,12 @@ function countPostWords(text = "") {
 }
 
 function initPostStats() {
-  if (!postContent) {
+  const currentPostContent = document.querySelector(".post-content");
+  if (!currentPostContent) {
     return;
   }
 
-  const wordCount = countPostWords(postContent.innerText || "");
+  const wordCount = countPostWords(currentPostContent.innerText || "");
   const minutes = Math.max(1, Math.ceil(wordCount / 420));
   const wordTarget = document.querySelector("[data-post-word-count]");
   const readTarget = document.querySelector("[data-post-read-time]");
@@ -758,34 +1438,9 @@ function initPostStats() {
   }
 }
 
-async function initPostViews() {
-  if (!postViewCount || !postShell) {
-    return;
-  }
-
-  const path = window.location.pathname;
-  const viewKey = `maki-viewed:${path}`;
-  const viewedAt = Number(localStorage.getItem(viewKey) || 0);
-  const recentlyViewed = Date.now() - viewedAt < 60 * 60 * 1000;
-  const method = recentlyViewed ? "GET" : "POST";
-
-  try {
-    const response = await fetch(`/api/views?path=${encodeURIComponent(path)}`, { method });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || "Could not load views");
-    }
-    postViewCount.textContent = String(Number(data.count || 0));
-    if (method === "POST" && data.writable !== false) {
-      localStorage.setItem(viewKey, String(Date.now()));
-    }
-  } catch {
-    postViewCount.textContent = "0";
-  }
-}
-
 function initReadProgressRecovery() {
-  if (!postShell) {
+  const currentPostShell = document.querySelector("[data-post-source]");
+  if (!currentPostShell) {
     return;
   }
 
@@ -824,13 +1479,15 @@ function initReadProgressRecovery() {
 }
 
 function buildPostToc() {
-  if (!postToc || !postContent) {
+  const currentPostToc = document.querySelector("[data-post-toc]");
+  const currentPostContent = document.querySelector(".post-content");
+  if (!currentPostToc || !currentPostContent) {
     return;
   }
 
   const headings = [
     document.querySelector("#post-title"),
-    ...postContent.querySelectorAll("h2[id], h3[id]"),
+    ...currentPostContent.querySelectorAll("h2[id], h3[id]"),
     document.querySelector("#comments"),
   ].filter(Boolean);
 
@@ -838,12 +1495,12 @@ function buildPostToc() {
     return;
   }
 
-  postToc.innerHTML = headings.map((heading, index) => {
+  currentPostToc.innerHTML = headings.map((heading, index) => {
     const label = heading.id === "comments" ? "comments" : heading.textContent.trim();
     return `<a href="#${heading.id}" data-rail-link>${String(index).padStart(2, "0")} / ${escapeHtml(label)}</a>`;
   }).join("");
 
-  const links = Array.from(postToc.querySelectorAll("[data-rail-link]"));
+  const links = Array.from(currentPostToc.querySelectorAll("[data-rail-link]"));
   const setActive = (id) => {
     links.forEach((link) => {
       const active = link.getAttribute("href") === `#${id}`;
@@ -885,14 +1542,15 @@ function buildPostToc() {
 }
 
 function initGiscus() {
-  if (!giscusSlot) {
+  const currentGiscusSlot = document.querySelector("[data-giscus-comments]");
+  if (!currentGiscusSlot) {
     return;
   }
 
-  const repoId = giscusSlot.dataset.repoId;
-  const categoryId = giscusSlot.dataset.categoryId;
+  const repoId = currentGiscusSlot.dataset.repoId;
+  const categoryId = currentGiscusSlot.dataset.categoryId;
   if (!repoId || !categoryId || repoId.startsWith("REPLACE_") || categoryId.startsWith("REPLACE_")) {
-    giscusSlot.innerHTML = '<p class="giscus-placeholder">Giscus 需要补充 repo-id 和 category-id 后启用。</p>';
+    currentGiscusSlot.innerHTML = '<p class="giscus-placeholder">Giscus 需要补充 repo-id 和 category-id 后启用。</p>';
     return;
   }
 
@@ -900,9 +1558,9 @@ function initGiscus() {
   script.src = "https://giscus.app/client.js";
   script.async = true;
   script.crossOrigin = "anonymous";
-  script.setAttribute("data-repo", giscusSlot.dataset.repo);
+  script.setAttribute("data-repo", currentGiscusSlot.dataset.repo);
   script.setAttribute("data-repo-id", repoId);
-  script.setAttribute("data-category", giscusSlot.dataset.category || "Announcements");
+  script.setAttribute("data-category", currentGiscusSlot.dataset.category || "Announcements");
   script.setAttribute("data-category-id", categoryId);
   script.setAttribute("data-mapping", "pathname");
   script.setAttribute("data-strict", "0");
@@ -911,7 +1569,7 @@ function initGiscus() {
   script.setAttribute("data-input-position", "bottom");
   script.setAttribute("data-theme", "preferred_color_scheme");
   script.setAttribute("data-lang", currentLang === "zh" ? "zh-CN" : "en");
-  giscusSlot.append(script);
+  currentGiscusSlot.append(script);
 }
 
 function parseMarkdownPost(source = "") {
@@ -1254,7 +1912,8 @@ function renderEditorPanel(post, options = {}) {
 }
 
 async function openPostEditor() {
-  if (!postShell || postShell.querySelector(".post-editor")) {
+  const currentPostShell = document.querySelector("[data-post-source]");
+  if (!currentPostShell || currentPostShell.querySelector(".post-editor")) {
     return;
   }
 
@@ -1262,14 +1921,14 @@ async function openPostEditor() {
   toolbar?.querySelector("button")?.setAttribute("disabled", "true");
 
   try {
-    const response = await fetch(`/api/post?path=${encodeURIComponent(postShell.dataset.postSource)}`);
+    const response = await fetch(`/api/post?path=${encodeURIComponent(currentPostShell.dataset.postSource)}`);
     const post = await response.json();
     if (!response.ok) {
       throw new Error(post.error || "Could not load source post");
     }
     editorSource = post.content;
     editorSha = post.sha;
-    postShell.insertBefore(renderEditorPanel(post), postShell.querySelector(".post-content"));
+    currentPostShell.insertBefore(renderEditorPanel(post), currentPostShell.querySelector(".post-content"));
   } catch (error) {
     window.alert(error.message);
   } finally {
@@ -1292,7 +1951,8 @@ Start writing here.
 }
 
 function openNewPostEditor() {
-  if (!blogTools || document.querySelector(".post-editor")) {
+  const currentBlogTools = document.querySelector(".blog-tools");
+  if (!currentBlogTools || document.querySelector(".post-editor")) {
     return;
   }
 
@@ -1301,12 +1961,13 @@ function openNewPostEditor() {
     sha: "",
     content: emptyPostSource(),
   }, { mode: "create" });
-  blogTools.insertAdjacentElement("afterend", panel);
+  currentBlogTools.insertAdjacentElement("afterend", panel);
   panel.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
 }
 
 async function deleteCurrentPost() {
-  if (!postShell?.dataset.postSource) {
+  const currentPostShell = document.querySelector("[data-post-source]");
+  if (!currentPostShell?.dataset.postSource) {
     return;
   }
 
@@ -1318,7 +1979,7 @@ async function deleteCurrentPost() {
   try {
     let sha = editorSha;
     if (!sha) {
-      const source = await fetch(`/api/post?path=${encodeURIComponent(postShell.dataset.postSource)}`);
+      const source = await fetch(`/api/post?path=${encodeURIComponent(currentPostShell.dataset.postSource)}`);
       const post = await source.json();
       if (!source.ok) {
         throw new Error(post.error || "Could not load source post");
@@ -1330,7 +1991,7 @@ async function deleteCurrentPost() {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        path: postShell.dataset.postSource,
+        path: currentPostShell.dataset.postSource,
         sha,
         message: "Delete post from site editor",
       }),
@@ -1346,43 +2007,47 @@ async function deleteCurrentPost() {
   }
 }
 
-function renderOwnerToolbar(session) {
-  if ((!postShell && !isArticleIndex) || document.querySelector("[data-editor-toolbar]")) {
+function renderOwnerToolbar(session = {}) {
+  const currentPostShell = document.querySelector("[data-post-source]");
+  const currentBlogTools = document.querySelector(".blog-tools");
+  const currentIsArticleIndex = Boolean(document.querySelector(".article-list--archive"));
+  if ((!currentPostShell && !currentIsArticleIndex) || document.querySelector("[data-editor-toolbar]")) {
     return;
   }
 
   const toolbar = document.createElement("div");
   toolbar.className = "owner-toolbar";
-  if (!postShell) {
+  if (!currentPostShell) {
     toolbar.classList.add("owner-toolbar--archive");
   }
   toolbar.dataset.editorToolbar = "true";
-  const actions = postShell
+  const actions = currentPostShell
     ? '<button class="owner-toolbar__button" type="button" data-editor-edit>Edit</button><button class="owner-toolbar__button owner-toolbar__button--danger" type="button" data-editor-delete>Delete</button>'
-    : '<button class="owner-toolbar__button" type="button" data-editor-new>New Post</button>';
+    : '<button class="owner-toolbar__button" type="button" data-editor-new>New post</button><a class="owner-toolbar__link" href="/api/auth/logout">Sign out</a>';
   toolbar.innerHTML = `
-    <div class="owner-toolbar__identity">
-      <span>owner mode</span>
-      <strong>${escapeHtml(session.login)}</strong>
-    </div>
     <div class="owner-toolbar__actions">
       ${actions}
-      <a class="owner-toolbar__link" href="/api/auth/logout">Sign out</a>
     </div>
   `;
   toolbar.querySelector("[data-editor-edit]")?.addEventListener("click", openPostEditor);
   toolbar.querySelector("[data-editor-delete]")?.addEventListener("click", deleteCurrentPost);
   toolbar.querySelector("[data-editor-new]")?.addEventListener("click", openNewPostEditor);
 
-  if (postShell) {
-    postShell.insertBefore(toolbar, postShell.querySelector(".post-back")?.nextSibling || postShell.firstChild);
+  if (currentPostShell) {
+    const topbar = currentPostShell.querySelector(".post-topbar");
+    if (topbar) {
+      topbar.append(toolbar);
+    } else {
+      currentPostShell.insertBefore(toolbar, currentPostShell.firstChild);
+    }
   } else {
-    blogTools?.insertAdjacentElement("beforebegin", toolbar);
+    document.querySelector(".page-heading")?.append(toolbar) || currentBlogTools?.insertAdjacentElement("beforebegin", toolbar);
   }
 }
 
 async function initOwnerEditor() {
   const params = new URLSearchParams(window.location.search);
+  const ownerToken = params.get("owner") || params.get("token");
   if (params.has("login")) {
     params.delete("login");
     const query = params.toString();
@@ -1391,7 +2056,18 @@ async function initOwnerEditor() {
     return;
   }
 
-  if (!postShell && !isArticleIndex) {
+  if (ownerToken) {
+    params.delete("owner");
+    params.delete("token");
+    const query = params.toString();
+    const next = `${window.location.pathname}${query ? `?${query}` : ""}`;
+    window.location.href = `/api/auth/owner?token=${encodeURIComponent(ownerToken)}&next=${encodeURIComponent(next || window.location.pathname)}`;
+    return;
+  }
+
+  const currentPostShell = document.querySelector("[data-post-source]");
+  const currentIsArticleIndex = Boolean(document.querySelector(".article-list--archive"));
+  if (!currentPostShell && !currentIsArticleIndex) {
     return;
   }
 
@@ -1399,6 +2075,8 @@ async function initOwnerEditor() {
     const response = await fetch("/api/me");
     editorSession = await response.json();
     if (editorSession.authorized) {
+      localStorage.setItem(ownerRememberKey, "1");
+      document.querySelector("[data-editor-toolbar]")?.remove();
       renderOwnerToolbar(editorSession);
     }
   } catch {
@@ -1406,15 +2084,7 @@ async function initOwnerEditor() {
   }
 }
 
-document.querySelectorAll(".nav-link").forEach((link) => {
-  const linkPath = new URL(link.getAttribute("href"), window.location.href).pathname;
-  const currentPath = window.location.pathname.endsWith("/") ? `${window.location.pathname}index.html` : window.location.pathname;
-
-  if (linkPath === currentPath || (linkPath.endsWith("/index.html") && currentPath.endsWith("/"))) {
-    link.classList.add("is-active");
-    link.setAttribute("aria-current", "page");
-  }
-});
+refreshActiveNav();
 
 navToggle?.addEventListener("click", () => {
   const isOpen = siteNav.classList.toggle("is-open");
@@ -1441,6 +2111,11 @@ themeToggle?.addEventListener("click", () => {
 });
 
 articleSearch?.addEventListener("input", updateArticleFilters);
+document.addEventListener("input", (event) => {
+  if (event.target.matches("[data-article-search]")) {
+    updateArticleFilters();
+  }
+});
 
 tagButtons.forEach((button) => {
   button.addEventListener("click", () => {
@@ -1452,6 +2127,20 @@ tagButtons.forEach((button) => {
     });
     updateArticleFilters();
   });
+});
+document.addEventListener("click", (event) => {
+  const filterButton = event.target.closest("[data-filter-tag]");
+  if (!filterButton) {
+    return;
+  }
+
+  activeTag = filterButton.dataset.filterTag || "all";
+  document.querySelectorAll("[data-filter-tag]").forEach((button) => {
+    const isActive = button === filterButton;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+  updateArticleFilters();
 });
 
 clearArticles?.addEventListener("click", () => {
@@ -1469,112 +2158,43 @@ clearArticles?.addEventListener("click", () => {
 
   updateArticleFilters();
 });
-
-initOwnerEditor();
-initCodeCopyButtons();
-initPostStats();
-initPostViews();
-initReadProgressRecovery();
-buildPostToc();
-initGiscus();
-
-document.querySelectorAll("[data-rail-link]").forEach((link) => {
-  link.addEventListener("click", (event) => {
-    const target = document.querySelector(link.getAttribute("href"));
-    if (!target) {
-      return;
-    }
-    event.preventDefault();
-    target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
-    history.replaceState(null, "", link.getAttribute("href"));
-  });
-});
-
-aboutCards.forEach((card) => {
-  card.addEventListener("mousemove", (event) => {
-    if (reduceMotion) {
-      return;
-    }
-
-    const rect = card.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    const y = ((event.clientY - rect.top) / rect.height) * 2 - 1;
-    card.style.setProperty("--tilt-x", String(x));
-    card.style.setProperty("--tilt-y", String(y));
-  });
-  card.addEventListener("mouseleave", () => {
-    card.style.setProperty("--tilt-x", "0");
-    card.style.setProperty("--tilt-y", "0");
-  });
-});
-
-spotlightCards.forEach((card) => {
-  card.addEventListener("mousemove", (event) => {
-    const rect = card.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    card.style.setProperty("--mouse-x", `${x}px`);
-    card.style.setProperty("--mouse-y", `${y}px`);
-  });
-});
-
-if (pageSections.length) {
-  const setActiveSection = (target) => {
-    const id = target.id || target.querySelector("[id]")?.id;
-    if (!id) {
-      return;
-    }
-
-    const index = Math.max(0, pageSections.indexOf(target));
-    const progress = pageSections.length > 1 ? index / (pageSections.length - 1) : 0;
-    document.documentElement.style.setProperty("--section-progress", progress.toFixed(3));
-
-    railLinks.forEach((link) => {
-      const isActive = link.getAttribute("href") === `#${id}`;
-      link.classList.toggle("is-active", isActive);
-      if (isActive) {
-        link.setAttribute("aria-current", "true");
-      } else {
-        link.removeAttribute("aria-current");
-      }
-    });
-  };
-
-  if ("IntersectionObserver" in window) {
-    const sectionObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target);
-          }
-        });
-      },
-      { threshold: 0.42, rootMargin: "-18% 0px -48% 0px" },
-    );
-
-    pageSections.forEach((section) => sectionObserver.observe(section));
+document.addEventListener("click", (event) => {
+  if (!event.target.closest("[data-clear-articles]")) {
+    return;
   }
 
-  setActiveSection(pageSections[0]);
-}
+  activeTag = "all";
+  const currentArticleSearch = document.querySelector("[data-article-search]");
+  if (currentArticleSearch) {
+    currentArticleSearch.value = "";
+  }
+  document.querySelectorAll("[data-filter-tag]").forEach((button) => {
+    const isActive = button.dataset.filterTag === "all";
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+  updateArticleFilters();
+});
 
-if (revealItems.length && !reduceMotion) {
-  const revealObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          revealObserver.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.16, rootMargin: "0px 0px -8% 0px" },
-  );
+initLocalMusicPlayer();
+initPartialNavigation();
+hydratePage();
 
-  revealItems.forEach((item) => revealObserver.observe(item));
-} else {
-  revealItems.forEach((item) => item.classList.add("is-visible"));
-}
+document.addEventListener("click", (event) => {
+  const link = event.target.closest("[data-rail-link]");
+  if (!link) {
+    return;
+  }
+
+  const target = document.querySelector(link.getAttribute("href"));
+  if (!target) {
+    return;
+  }
+
+  event.preventDefault();
+  target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  history.replaceState(null, "", link.getAttribute("href"));
+});
 
 window.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
@@ -1583,9 +2203,12 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-(function initGridSVG() {
+function initGridSVG() {
   const svg = document.getElementById("grid-overlay");
   if (!svg) return;
+  if (svg.dataset.gridReady === "true") return;
+  svg.dataset.gridReady = "true";
+
   const GRID_SIZE = 64;
   const BEND_RADIUS = 220;
   const MAX_BEND = 9;
@@ -1772,4 +2395,4 @@ window.addEventListener("keydown", (event) => {
   });
   window.addEventListener("resize", resize);
   resize();
-})();
+}

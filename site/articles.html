@@ -13,7 +13,7 @@
     <meta property="og:description" content="maki 的文章列表，收集技术、设计、工作流和生活笔记。" />
     <meta property="og:url" content="https://maki-s-blog.vercel.app/articles.html" />
     <meta name="twitter:card" content="summary" />
-    <link rel="stylesheet" href="styles.css?v=6.0-content-system" />
+    <link rel="stylesheet" href="styles.css?v=7.9-light-navigation" />
     <link rel="stylesheet" href="articles-redesign.css?v=1" />
   </head>
   <body>
@@ -69,7 +69,7 @@
           <input
             type="search"
             data-article-search
-            placeholder="搜索标题、摘要或标签"
+            placeholder="搜索文章、摘要或标签..."
             aria-label="搜索文章"
           />
         </label>
@@ -83,6 +83,7 @@
           <button class="tag-pill" type="button" data-filter-tag="notes">Notes</button>
           <button class="tag-pill" type="button" data-filter-tag="workflow">Workflow</button>
           <button class="tag-pill" type="button" data-filter-tag="测试">测试</button>
+          <button class="clear-filter" type="button" data-clear-articles data-i18n="blog.clear">清除筛选</button>
           <!-- POSTS:TAGS:END -->
         </div>
       </section>
@@ -95,7 +96,7 @@
 
         <div class="article-list article-list--archive">
           <!-- POSTS:ARCHIVE:START -->
-          <details class="archive-year" data-archive-year open>
+          <details class="archive-year" data-archive-year data-year="2026" open>
             <summary>
               <span>2026</span>
               <small>5 posts</small>
@@ -115,7 +116,6 @@
               <span class="article-item__title">壁纸</span>
               <span class="article-item__meta">
                 <span>2026.06.06 22:48</span>
-                <span>1 MIN READ</span>
               </span>
               <span class="article-item__summary">一个壁纸</span>
               <span class="article-item__tags">
@@ -138,7 +138,6 @@
               <span class="article-item__title">测试一下</span>
               <span class="article-item__meta">
                 <span>2026.06.06 00:00</span>
-                <span>1 MIN READ</span>
               </span>
               <span class="article-item__summary">大概就是这样测试一下摘要</span>
               <span class="article-item__tags">
@@ -161,7 +160,6 @@
               <span class="article-item__title">构建个人博客的第一周</span>
               <span class="article-item__meta">
                 <span>2026.06.03 00:00</span>
-                <span>1 MIN READ</span>
               </span>
               <span class="article-item__summary">从信息架构、视觉方向和写作习惯开始，记录个人博客搭建的第一阶段。</span>
               <span class="article-item__tags">
@@ -185,7 +183,6 @@
               <span class="article-item__title">关于前端体验的一些笔记</span>
               <span class="article-item__meta">
                 <span>2026.06.02 00:00</span>
-                <span>1 MIN READ</span>
               </span>
               <span class="article-item__summary">一些关于界面节奏、状态反馈、排版和微交互的观察。</span>
               <span class="article-item__tags">
@@ -209,7 +206,6 @@
               <span class="article-item__title">我如何整理自己的知识库</span>
               <span class="article-item__meta">
                 <span>2026.06.01 00:00</span>
-                <span>1 MIN READ</span>
               </span>
               <span class="article-item__summary">把碎片信息变成可回访、可连接、可持续维护的个人知识系统。</span>
               <span class="article-item__tags">
@@ -246,6 +242,6 @@
       </div>
     </footer>
 
-    <script src="script.js?v=6.0-content-system"></script>
+    <script src="script.js?v=7.9-light-navigation"></script>
   </body>
 </html>
