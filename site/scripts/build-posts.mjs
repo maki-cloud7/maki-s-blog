@@ -9,7 +9,7 @@ const friendsFile = path.join(root, "content", "friends.json");
 const tagsFile = path.join(root, "content", "tags.json");
 const socialsFile = path.join(root, "content", "socials.json");
 const outputDir = path.join(root, "posts");
-const assetVersion = "8.5-heading-shift";
+const assetVersion = "8.6-jimi-post";
 const siteUrl = "https://maki-s-blog.vercel.app";
 const siteTitle = "maki's blog";
 const siteDescription = "maki 的个人博客，用来记录技术、想法、作品和生活。";
@@ -615,20 +615,11 @@ function renderPostPage(post, socials) {
     </header>
 
     <main class="page post-page inner-page">
-      <nav class="page-rail post-rail" aria-label="文章目录" data-post-toc>
-        <a href="#post-title" data-rail-link>00 / title</a>
-      </nav>
       <article class="post-shell" data-post-source="${escapeHtml(post.sourcePath)}">
-        <a class="post-back" href="../articles.html">← 返回文章列表</a>
         <header class="post-header">
-          <span class="page-heading__index post-meta-line">
-            <span>${escapeHtml(formatDateTime(post.date))}</span>
-            <span data-post-word-count>--</span>
-            <span data-post-read-time>--</span>
-            <span><span data-post-view-count>--</span> 浏览</span>
-          </span>
           <h1 id="post-title">${escapeHtml(post.title)}</h1>
           <p>${escapeHtml(post.summary)}</p>
+          <time class="post-date" datetime="${escapeHtml(post.date)}">${escapeHtml(formatDateTime(post.date))}</time>
           <div class="article-item__tags">${tags}</div>
         </header>
         <div class="post-content">
