@@ -5130,7 +5130,7 @@ body.is-scrolling .hero::after {
   }
 }
 
-/* v8.6 compact red-bar inner headings */
+/* v8.7 compact red-bar inner headings */
 .blog-page,
 .projects-page,
 .guestbook-page,
@@ -5326,7 +5326,7 @@ body.is-scrolling .hero::after {
   }
 }
 
-/* v8.6 article heading content-column alignment */
+/* v8.7 article heading content-column alignment */
 .blog-page {
   --article-content-width: min(100%, 1080px);
 }
@@ -5342,7 +5342,7 @@ body.is-scrolling .hero::after {
   margin-left: auto;
 }
 
-/* v8.6 tighter content-column inner pages */
+/* v8.7 tighter content-column inner pages */
 .blog-page,
 .projects-page,
 .guestbook-page,
@@ -5404,7 +5404,7 @@ body.is-scrolling .hero::after {
   }
 }
 
-/* v8.6 shift inner headings to card edge */
+/* v8.7 shift inner headings to card edge */
 .blog-page,
 .projects-page,
 .guestbook-page,
@@ -5433,7 +5433,7 @@ body.is-scrolling .hero::after {
   }
 }
 
-/* v8.6 jimi-inspired post detail */
+/* v8.7 jimi-inspired post detail */
 .post-page {
   width: min(1120px, calc(100% - 120px));
   margin-inline: auto;
@@ -5615,5 +5615,125 @@ body.is-scrolling .hero::after {
   .post-header::before {
     height: clamp(52px, 14vw, 72px);
   }
+}
+
+/* v8.7 compact jimi post rhythm */
+.post-page {
+  width: min(980px, calc(100% - 120px));
+}
+
+.post-shell {
+  width: min(100%, 760px);
+  padding-top: clamp(18px, 3.4vw, 42px);
+}
+
+.post-header {
+  grid-template-columns: clamp(8px, 0.7vw, 11px) minmax(0, 1fr);
+  gap: clamp(14px, 1.7vw, 22px);
+  margin-bottom: clamp(22px, 3vw, 36px);
+  border-bottom: 0;
+  padding-bottom: clamp(14px, 2vw, 24px);
+}
+
+.post-header::before {
+  height: clamp(54px, 5.4vw, 78px);
+  margin-top: 0.16em;
+}
+
+.post-header h1 {
+  max-width: 11em;
+  font-size: clamp(42px, 4.7vw, 70px);
+  line-height: 1.02;
+}
+
+.post-header p {
+  margin-top: clamp(8px, 1vw, 13px);
+  font-size: clamp(15px, 1.18vw, 17px);
+  line-height: 1.58;
+}
+
+.post-header .post-date {
+  margin-top: clamp(8px, 1vw, 13px);
+  font-size: 14px;
+}
+
+.post-header .article-item__tags {
+  margin-top: clamp(12px, 1.4vw, 18px);
+}
+
+.post-header .article-item__tags span {
+  padding: 4px 7px;
+  font-size: 12px;
+}
+
+.post-content {
+  max-width: min(100%, 760px);
+  font-size: clamp(16px, 1.22vw, 18px);
+  line-height: 1.82;
+}
+
+.post-content p,
+.post-content ul,
+.post-content ol,
+.post-content blockquote,
+.post-content h2,
+.post-content h3,
+.post-content h4 {
+  max-width: 100%;
+}
+
+.post-content h2 {
+  margin-top: clamp(28px, 4vw, 46px);
+  margin-bottom: 14px;
+  border-bottom: 0;
+  padding-bottom: 0;
+  font-size: clamp(30px, 3vw, 42px);
+}
+
+.post-content h3 {
+  margin-top: 30px;
+  margin-bottom: 12px;
+}
+
+.post-content p,
+.post-content ul,
+.post-content ol,
+.post-content blockquote {
+  margin-bottom: 1.25em;
+}
+
+.post-content hr {
+  display: none;
+}
+
+.post-comments {
+  max-width: 760px;
+}
+
+@media (max-width: 820px) {
+  .post-page {
+    width: min(100% - 32px, 980px);
+  }
+
+  .post-shell {
+    padding-top: 24px;
+  }
+}
+
+/* v8.7 final compact post spacing */
+.post-header {
+  row-gap: 0;
+  margin-bottom: clamp(10px, 1.6vw, 20px);
+  padding-bottom: clamp(8px, 1.2vw, 14px);
+}
+
+.post-header .article-item__tags {
+  margin-top: clamp(8px, 1vw, 12px);
+}
+
+.post-content h2:first-child,
+.post-content h3:first-child,
+.post-content p:first-child {
+  margin-top: 0;
 }
 
