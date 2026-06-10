@@ -7,7 +7,6 @@ const copy = {
     "nav.guestbook": "留言板",
     "nav.about": "关于",
     "hero.kicker": "personal blog / notes / tiny experiments",
-    "hero.intro": "为美好的世界献上祝福！",
     "hero.scroll": "阅读文章",
     "home.profile.title": "写代码，也写生活",
     "home.profile.bio": "迷茫地不知道写什么介绍自己",
@@ -87,7 +86,6 @@ const copy = {
     "about.timeline.two": "记录前端体验、界面细节和小工具实验。",
     "about.timeline.three": "把生活里的碎片想法整理成可以回访的笔记。",
     "widget.status": "接收新想法中",
-    "widget.nowplaying": "正在播放",
     "footer.copy": "© 2026 maki. Built for notes, ideas, and experiments.",
     "footer.back": "回到首页",
   },
@@ -99,7 +97,6 @@ const copy = {
     "nav.guestbook": "Guestbook",
     "nav.about": "About",
     "hero.kicker": "personal blog / notes / tiny experiments",
-    "hero.intro": "This is maki's personal blog for notes on code, ideas, projects, and everyday life.",
     "hero.scroll": "Read writing",
     "home.profile.title": "Writing code, and writing life",
     "home.profile.bio": "I like turning technology, ideas, projects, and everyday fragments into notes worth revisiting. This place will grow into a quiet, clear, slightly playful personal space.",
@@ -205,8 +202,6 @@ const articleCount = document.querySelector("[data-article-count]");
 const emptyArticles = document.querySelector("[data-empty-articles]");
 const clearArticles = document.querySelector("[data-clear-articles]");
 const tagButtons = Array.from(document.querySelectorAll("[data-filter-tag]"));
-const musicCardPlay = document.querySelector("[data-music-card-play]");
-const musicCardNext = document.querySelector("[data-music-card-next]");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 let phraseIndex = 0;
@@ -651,291 +646,6 @@ updateLocalClock();
 updateTechClock();
 initKineticAtmosphere();
 initRotaryKnob();
-
-function initLocalMusicPlayer() {
-  const header = document.querySelector(".site-header");
-  const player = document.createElement("aside");
-  player.className = "site-music";
-  player.dataset.siteMusic = "";
-  player.dataset.playing = "false";
-  player.innerHTML = `
-    <button class="site-music__play" type="button" data-music-play aria-label="播放或暂停">
-      <svg data-music-icon-play viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M8 5v14l11-7Z" />
-      </svg>
-      <svg data-music-icon-pause viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M8 5v14M16 5v14" />
-      </svg>
-    </button>
-    <div class="site-music__body">
-      <strong data-music-title>加载音乐库</strong>
-      <small data-music-detail>正在读取本地网站音乐</small>
-    </div>
-    <label class="site-music__progress" aria-label="播放进度">
-      <input type="range" min="0" max="1000" value="0" step="1" data-music-progress />
-    </label>
-    <div class="site-music__actions">
-      <button type="button" data-music-next aria-label="下一首">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M5 5v14l10-7Z" />
-          <path d="M19 5v14" />
-        </svg>
-      </button>
-    </div>
-    <audio data-music-audio preload="none"></audio>
-  `;
-  if (header) {
-    header.insertAdjacentElement("afterend", player);
-  } else {
-    document.body.prepend(player);
-  }
-
-  const audio = player.querySelector("[data-music-audio]");
-  const playButton = player.querySelector("[data-music-play]");
-  const nextButton = player.querySelector("[data-music-next]");
-  const progress = player.querySelector("[data-music-progress]");
-  const title = player.querySelector("[data-music-title]");
-  const detail = player.querySelector("[data-music-detail]");
-  const stateKey = "maki-music-state";
-  let tracks = [];
-  let currentTrack = -1;
-  let shouldResume = false;
-  let pendingAutoplay = false;
-
-  if (!audio || !playButton || !title || !detail) {
-    return;
-  }
-
-  const readState = () => {
-    try {
-      return JSON.parse(localStorage.getItem(stateKey) || "{}");
-    } catch {
-      return {};
-    }
-  };
-  const writeState = () => {
-    const track = tracks[currentTrack];
-    if (!track) {
-      return;
-    }
-
-    localStorage.setItem(
-      stateKey,
-      JSON.stringify({
-        src: track.src,
-        time: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
-        playing: !audio.paused,
-        updatedAt: Date.now()
-      })
-    );
-  };
-  const cleanName = (name = "") => name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim() || name;
-  const syncDisplay = () => {
-    if (!tracks.length || currentTrack < 0) {
-      return;
-    }
-
-    const track = tracks[currentTrack];
-    title.textContent = track.title || cleanName(track.src.split("/").pop() || "");
-    detail.textContent = track.artist ? `${track.artist} · ${currentTrack + 1} / ${tracks.length}` : `${currentTrack + 1} / ${tracks.length}`;
-
-    document.querySelectorAll("[data-music-card-title]").forEach((node) => {
-      node.textContent = title.textContent;
-    });
-
-    const cardDetails = Array.from(document.querySelectorAll("[data-music-card-detail]"));
-    if (cardDetails.length) {
-      const state = player.dataset.playing === "true" ? "正在播放" : "已暂停";
-      const cardText = `${state} · ${detail.textContent}`;
-      cardDetails.forEach((node) => {
-        node.textContent = cardText;
-      });
-    }
-
-  };
-  const syncProgress = () => {
-    if (!progress || !Number.isFinite(audio.duration) || audio.duration <= 0) {
-      return;
-    }
-
-    const value = Math.round((audio.currentTime / audio.duration) * 1000);
-    const percent = `${(audio.currentTime / audio.duration) * 100}%`;
-    progress.value = String(value);
-    progress.style.setProperty("--progress", percent);
-    document.querySelectorAll("[data-music-card-progress]").forEach((input) => {
-      input.value = String(value);
-      input.style.setProperty("--progress", percent);
-    });
-  };
-  const playWhenAllowed = ({ mutedStart = false } = {}) => {
-    pendingAutoplay = false;
-    if (mutedStart) {
-      audio.muted = true;
-    }
-    audio.play().then(() => {
-      if (!mutedStart) {
-        return;
-      }
-      window.setTimeout(() => {
-        audio.muted = false;
-        audio.volume = 1;
-      }, 120);
-    }).catch(() => {
-      pendingAutoplay = true;
-      const currentDetail = detail.textContent;
-      detail.textContent = "点击页面后开始播放";
-      document.querySelectorAll("[data-music-card-detail]").forEach((node) => {
-        const trackDetail = currentDetail ? ` · ${currentDetail}` : "";
-        node.textContent = `点击页面后开始播放${trackDetail}`;
-      });
-    });
-  };
-
-  const setTrack = (index, shouldPlay = false, startTime = 0) => {
-    if (!tracks.length) {
-      return;
-    }
-
-    currentTrack = (index + tracks.length) % tracks.length;
-    const track = tracks[currentTrack];
-    audio.src = track.src;
-    const targetTime = Math.max(0, startTime || 0);
-    if (targetTime > 0) {
-      audio.addEventListener(
-        "loadedmetadata",
-        () => {
-          audio.currentTime = Math.min(targetTime, audio.duration || targetTime);
-        },
-        { once: true }
-      );
-    }
-    player.dataset.playing = "false";
-    syncDisplay();
-
-    if (shouldPlay) {
-      playWhenAllowed({ mutedStart: true });
-    }
-  };
-
-  const togglePlayback = () => {
-    if (!tracks.length) {
-      return;
-    }
-
-    if (audio.paused) {
-      audio.play();
-    } else {
-      audio.pause();
-    }
-  };
-  const nextTrack = () => setTrack(currentTrack + 1, true);
-  playButton.addEventListener("click", togglePlayback);
-  nextButton?.addEventListener("click", nextTrack);
-  progress?.addEventListener("input", () => {
-    if (!Number.isFinite(audio.duration) || audio.duration <= 0) {
-      return;
-    }
-
-    audio.currentTime = (Number(progress.value) / 1000) * audio.duration;
-    syncProgress();
-    writeState();
-  });
-  document.addEventListener("input", (event) => {
-    const cardProgress = event.target.closest("[data-music-card-progress]");
-    if (!cardProgress || !Number.isFinite(audio.duration) || audio.duration <= 0) {
-      return;
-    }
-
-    audio.currentTime = (Number(cardProgress.value) / 1000) * audio.duration;
-    syncProgress();
-    writeState();
-  });
-  document.addEventListener("click", (event) => {
-    if (event.target.closest("[data-music-card-play]")) {
-      togglePlayback();
-    } else if (event.target.closest("[data-music-card-next]")) {
-      nextTrack();
-    }
-  });
-  document.addEventListener("pointerdown", () => {
-    if (pendingAutoplay && audio.paused && tracks.length) {
-      audio.muted = false;
-      playWhenAllowed();
-    } else if (audio.muted) {
-      audio.muted = false;
-      audio.volume = 1;
-    }
-  }, { once: false });
-  audio.addEventListener("play", () => {
-    player.dataset.playing = "true";
-    document.body.dataset.musicPlaying = "true";
-    document.querySelectorAll(".composition-widget--music").forEach((card) => {
-      card.dataset.playing = "true";
-    });
-    shouldResume = true;
-    writeState();
-    syncDisplay();
-  });
-  audio.addEventListener("pause", () => {
-    player.dataset.playing = "false";
-    document.body.dataset.musicPlaying = "false";
-    document.querySelectorAll(".composition-widget--music").forEach((card) => {
-      card.dataset.playing = "false";
-    });
-    shouldResume = false;
-    writeState();
-    syncDisplay();
-  });
-  audio.addEventListener("timeupdate", writeState);
-  audio.addEventListener("timeupdate", syncProgress);
-  audio.addEventListener("loadedmetadata", syncProgress);
-  window.addEventListener("pagehide", writeState);
-  audio.addEventListener("ended", () => setTrack(currentTrack + 1, true));
-  window.makiMusicSync = () => {
-    syncDisplay();
-    syncProgress();
-  };
-
-  fetch("/content/playlist.json")
-    .then((response) => (response.ok ? response.json() : []))
-    .then((playlist) => {
-      tracks = Array.isArray(playlist) ? playlist.filter((track) => track && track.src) : [];
-
-      if (!tracks.length) {
-        title.textContent = "音乐库为空";
-        detail.textContent = "把音频放入 assets/audio 并更新 playlist.json";
-        document.querySelectorAll("[data-music-card-title]").forEach((node) => {
-          node.textContent = "音乐库为空";
-        });
-        document.querySelectorAll("[data-music-card-detail]").forEach((node) => {
-          node.textContent = "把音频放入 assets/audio 并更新 playlist.json";
-        });
-        return;
-      }
-
-      currentTrack = 0;
-      syncDisplay();
-
-      const savedState = readState();
-      const savedIndex = tracks.findIndex((track) => track.src === savedState.src);
-      const resumeIndex = savedIndex >= 0 ? savedIndex : 0;
-      const resumeTime = savedIndex >= 0 ? Number(savedState.time || 0) : 0;
-      const recentlyActive = Date.now() - Number(savedState.updatedAt || 0) < 10 * 60 * 1000;
-      shouldResume = savedState.playing === true && recentlyActive;
-
-      setTrack(resumeIndex, true, resumeTime);
-    })
-    .catch(() => {
-      title.textContent = "音乐库未配置";
-      detail.textContent = "检查 content/playlist.json";
-      document.querySelectorAll("[data-music-card-title]").forEach((node) => {
-        node.textContent = "音乐库未配置";
-      });
-      document.querySelectorAll("[data-music-card-detail]").forEach((node) => {
-        node.textContent = "检查 content/playlist.json";
-      });
-    });
-}
 
 function refreshActiveNav() {
   document.querySelectorAll(".nav-link").forEach((link) => {
@@ -2176,7 +1886,6 @@ document.addEventListener("click", (event) => {
   updateArticleFilters();
 });
 
-initLocalMusicPlayer();
 initPartialNavigation();
 hydratePage();
 
