@@ -5130,7 +5130,7 @@ body.is-scrolling .hero::after {
   }
 }
 
-/* v8.3 compact red-bar inner headings */
+/* v8.4 compact red-bar inner headings */
 .blog-page,
 .projects-page,
 .guestbook-page,
@@ -5326,7 +5326,7 @@ body.is-scrolling .hero::after {
   }
 }
 
-/* v8.3 article heading content-column alignment */
+/* v8.4 article heading content-column alignment */
 .blog-page {
   --article-content-width: min(100%, 1080px);
 }
@@ -5340,5 +5340,67 @@ body.is-scrolling .hero::after {
 
 .blog-page .page-heading .owner-toolbar {
   margin-left: auto;
+}
+
+/* v8.4 tighter content-column inner pages */
+.blog-page,
+.projects-page,
+.guestbook-page,
+.links-page,
+.about-composition {
+  --inner-content-width: min(100%, 1080px);
+}
+
+.blog-page .page-heading,
+.projects-page .page-heading,
+.guestbook-page .page-heading,
+.links-page .page-heading,
+.about-composition .composition-hero,
+.blog-page .blog-tools,
+.blog-page .blog-results,
+.projects-page .page-panel,
+.guestbook-page .page-panel,
+.links-page .page-panel,
+.about-composition .composition-grid {
+  width: var(--inner-content-width);
+  margin-inline: auto;
+}
+
+.blog-page .page-heading,
+.projects-page .page-heading,
+.guestbook-page .page-heading,
+.links-page .page-heading,
+.about-composition .composition-hero {
+  padding-top: clamp(18px, 3.4vw, 44px);
+  padding-bottom: clamp(12px, 2vw, 22px);
+  margin-bottom: clamp(8px, 1.7vw, 18px);
+}
+
+.blog-page .page-heading::before,
+.projects-page .page-heading::before,
+.guestbook-page .page-heading::before,
+.links-page .page-heading::before,
+.about-composition .composition-hero::before {
+  justify-self: start;
+  width: clamp(8px, 0.8vw, 12px);
+}
+
+.blog-page .blog-tools,
+.blog-page .blog-results,
+.projects-page .page-panel,
+.guestbook-page .page-panel,
+.links-page .page-panel,
+.about-composition .composition-grid {
+  margin-top: clamp(6px, 1.2vw, 14px);
+}
+
+@media (max-width: 900px) {
+  .blog-page .page-heading,
+  .projects-page .page-heading,
+  .guestbook-page .page-heading,
+  .links-page .page-heading,
+  .about-composition .composition-hero {
+    padding-top: 22px;
+  }
 }
 
