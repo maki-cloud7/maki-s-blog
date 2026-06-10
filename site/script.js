@@ -709,7 +709,7 @@ function initPartialNavigation() {
   const fetchPageHtml = async (url, { timeoutMs = 8000 } = {}) => {
     const key = getPageKey(url);
     if (pageCache.has(key)) {
-      return pageCache.get(key);
+      pageCache.delete(key);
     }
     if (pendingPages.has(key)) {
       return pendingPages.get(key);
@@ -718,7 +718,11 @@ function initPartialNavigation() {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
     const request = fetch(url.href, {
-      headers: { "X-Requested-With": "fetch" },
+      cache: "no-store",
+      headers: {
+        "X-Requested-With": "fetch",
+        "Cache-Control": "no-store",
+      },
       signal: controller.signal,
     })
       .then((response) => {
@@ -727,10 +731,7 @@ function initPartialNavigation() {
         }
         return response.text();
       })
-      .then((html) => {
-        rememberPage(key, html);
-        return html;
-      })
+      .then((html) => html)
       .finally(() => {
         window.clearTimeout(timeout);
         pendingPages.delete(key);
