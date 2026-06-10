@@ -559,7 +559,6 @@ ${entries.map(({ post, index }) => {
               <span class="article-item__title">${escapeHtml(post.title)}</span>
               <span class="article-item__meta">
                 <span>${escapeHtml(formatDateTime(post.date))}</span>
-                <span>${escapeHtml(post.readTime)}</span>
               </span>
               <span class="article-item__summary">${escapeHtml(post.summary)}</span>
               <span class="article-item__tags">
