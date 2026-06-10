@@ -1887,7 +1887,7 @@ document.addEventListener("click", (event) => {
   updateArticleFilters();
 });
 
-initPartialNavigation();
+// Native navigation keeps page-specific CSS and effects from leaking between pages.
 hydratePage();
 
 document.addEventListener("click", (event) => {

@@ -5130,7 +5130,7 @@ body.is-scrolling .hero::after {
   }
 }
 
-/* v8.2 compact red-bar inner headings */
+/* v8.3 compact red-bar inner headings */
 .blog-page,
 .projects-page,
 .guestbook-page,
@@ -5325,3 +5325,20 @@ body.is-scrolling .hero::after {
     font-size: clamp(34px, 12vw, 50px);
   }
 }
+
+/* v8.3 article heading content-column alignment */
+.blog-page {
+  --article-content-width: min(100%, 1080px);
+}
+
+.blog-page .page-heading,
+.blog-page .blog-tools,
+.blog-page .blog-results {
+  width: var(--article-content-width);
+  margin-inline: auto;
+}
+
+.blog-page .page-heading .owner-toolbar {
+  margin-left: auto;
+}
+
