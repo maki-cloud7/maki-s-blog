@@ -13,7 +13,7 @@
     <meta property="og:description" content="关于 maki，以及这个长期更新的个人博客。" />
     <meta property="og:url" content="https://maki-s-blog.vercel.app/about.html" />
     <meta name="twitter:card" content="summary" />
-    <link rel="stylesheet" href="styles.css?v=9.1-music-editor-alignment" />
+    <link rel="stylesheet" href="styles.css?v=9.2-v8-music-editor-shift" />
   </head>
   <body>
     <div class="site-line" aria-hidden="true"></div>
@@ -154,22 +154,41 @@
           class="composition-card composition-card--m composition-widget composition-widget--music"
           tabindex="0"
           data-about-card
-          aria-label="装饰音乐播放器"
+          data-music-player
         >
-          <div class="decor-player__disc" aria-hidden="true">
-            <span></span>
+          <svg class="vinyl" viewBox="0 0 72 72" aria-hidden="true">
+            <circle cx="36" cy="36" r="31" />
+            <circle cx="36" cy="36" r="13" />
+            <circle cx="36" cy="36" r="3" />
+            <path d="M36 9a27 27 0 0 1 19 8" />
+            <path d="M17 55a27 27 0 0 1-7-19" />
+          </svg>
+          <div class="now-playing">
+            <span data-music-status>站内歌单</span>
+            <strong data-music-title>歌单未配置</strong>
+            <small data-music-artist>添加音频文件后播放</small>
+            <div class="music-progress" aria-hidden="true">
+              <span data-music-progress></span>
+            </div>
+            <div class="music-controls" aria-label="音乐播放器">
+              <button class="music-control" type="button" data-music-play aria-label="播放或暂停" disabled>
+                <svg class="music-icon music-icon--play" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 5v14l11-7Z" />
+                </svg>
+                <svg class="music-icon music-icon--pause" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 5h3v14H7zM14 5h3v14h-3z" />
+                </svg>
+              </button>
+              <button class="music-control" type="button" data-music-next aria-label="下一首" disabled>
+                <svg class="music-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 6v12l8-6Z" />
+                  <path d="M16 6h3v12h-3z" />
+                </svg>
+              </button>
+              <span class="music-count" data-music-count>0 / 0</span>
+            </div>
           </div>
-          <div class="decor-player__body">
-            <span class="widget-kicker">now looping</span>
-            <h2>夜间播放</h2>
-            <p>silent track / for layout only</p>
-            <div class="decor-player__bar" aria-hidden="true"><span></span></div>
-          </div>
-          <button class="decor-player__button" type="button" aria-label="装饰播放按钮" tabindex="-1">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M9 7.4v9.2L16.2 12 9 7.4Z" />
-            </svg>
-          </button>
+          <audio data-music-audio preload="metadata"></audio>
         </article>
       </section>
     </main>
@@ -192,6 +211,6 @@
       </div>
     </footer>
 
-    <script src="script.js?v=9.1-music-editor-alignment"></script>
+    <script src="script.js?v=9.2-v8-music-editor-shift"></script>
   </body>
 </html>
