@@ -1740,10 +1740,6 @@ function renderOwnerToolbar(session = {}) {
       : '<button class="owner-toolbar__button" type="button" data-editor-new>新增文章</button><a class="owner-toolbar__link" href="/api/auth/logout">退出登录</a>')
     : `<a class="owner-toolbar__button" href="/api/auth/login?next=${next}">${currentPostShell ? "管理文章" : "写新文章"}</a>`;
   toolbar.innerHTML = `
-    <div class="owner-toolbar__identity">
-      <span>${isAuthorized ? "owner mode" : "editor access"}</span>
-      <strong>${isAuthorized ? "已登录" : "登录后可新增 / 编辑 / 删除"}</strong>
-    </div>
     <div class="owner-toolbar__actions">
       ${actions}
     </div>

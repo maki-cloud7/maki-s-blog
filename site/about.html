@@ -13,7 +13,7 @@
     <meta property="og:description" content="关于 maki，以及这个长期更新的个人博客。" />
     <meta property="og:url" content="https://maki-s-blog.vercel.app/about.html" />
     <meta name="twitter:card" content="summary" />
-    <link rel="stylesheet" href="styles.css?v=9.0-editor-about-polish" />
+    <link rel="stylesheet" href="styles.css?v=9.1-music-editor-alignment" />
   </head>
   <body>
     <div class="site-line" aria-hidden="true"></div>
@@ -151,17 +151,25 @@
         </article>
 
         <article
-          class="composition-card composition-card--m composition-widget composition-widget--stack"
+          class="composition-card composition-card--m composition-widget composition-widget--music"
           tabindex="0"
           data-about-card
+          aria-label="装饰音乐播放器"
         >
-          <span class="widget-kicker">now building</span>
-          <h2>创作栈</h2>
-          <ul>
-            <li><span>01</span> 写作系统</li>
-            <li><span>02</span> 前端实验</li>
-            <li><span>03</span> 视觉收藏</li>
-          </ul>
+          <div class="decor-player__disc" aria-hidden="true">
+            <span></span>
+          </div>
+          <div class="decor-player__body">
+            <span class="widget-kicker">now looping</span>
+            <h2>夜间播放</h2>
+            <p>silent track / for layout only</p>
+            <div class="decor-player__bar" aria-hidden="true"><span></span></div>
+          </div>
+          <button class="decor-player__button" type="button" aria-label="装饰播放按钮" tabindex="-1">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M9 7.4v9.2L16.2 12 9 7.4Z" />
+            </svg>
+          </button>
         </article>
       </section>
     </main>
@@ -184,6 +192,6 @@
       </div>
     </footer>
 
-    <script src="script.js?v=9.0-editor-about-polish"></script>
+    <script src="script.js?v=9.1-music-editor-alignment"></script>
   </body>
 </html>
