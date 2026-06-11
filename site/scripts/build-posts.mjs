@@ -9,7 +9,7 @@ const friendsFile = path.join(root, "content", "friends.json");
 const tagsFile = path.join(root, "content", "tags.json");
 const socialsFile = path.join(root, "content", "socials.json");
 const outputDir = path.join(root, "posts");
-const assetVersion = "8.9-home-post-rhythm";
+const assetVersion = "9.0-editor-about-polish";
 const siteUrl = "https://maki-s-blog.vercel.app";
 const siteTitle = "maki's blog";
 const siteDescription = "maki 的个人博客，用来记录技术、想法、作品和生活。";
@@ -295,12 +295,12 @@ function renderSocialIcon(social) {
   }
   if (/telegram|t\.me/i.test(key)) {
     return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M21.7 4.3c.3-1-.6-1.8-1.6-1.4L2.8 9.6c-1.2.5-1.2 2.2.1 2.6l4.4 1.4 1.7 5.4c.4 1.1 1.8 1.4 2.6.5l2.5-2.8 4.7 3.4c.9.7 2.2.2 2.4-1l2.5-14.8Zm-4.2 3.2-8.3 7.4-.3 3.1-1.1-3.7 9.7-6.8Z" />
+          <path d="M21.6 4.4c.3-1.1-.7-2-1.8-1.5L2.9 9.5c-1.2.5-1.2 2.3.1 2.7l4.2 1.3 1.6 5.1c.4 1.2 1.9 1.5 2.7.5l2.3-2.6 4.4 3.2c1 .7 2.3.2 2.5-1l.9-14.3ZM17.7 7 9.5 14.4l-.4 3.1-1.1-3.7L17.7 7Z" />
         </svg>`;
   }
   if (/bilibili|哔哩/i.test(key)) {
     return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M8.4 3.5 10.7 6h2.6l2.3-2.5 1.3 1.2L15.7 6h2.1a3.2 3.2 0 0 1 3.2 3.2v8.1a3.2 3.2 0 0 1-3.2 3.2H6.2A3.2 3.2 0 0 1 3 17.3V9.2A3.2 3.2 0 0 1 6.2 6h2.1L7.1 4.7l1.3-1.2Zm-2.2 8.1v5.7c0 .5.4.9.9.9h10.7c.5 0 .9-.4.9-.9V9.2c0-.5-.4-.9-.9-.9H6.2c-.5 0-.9.4-.9.9v2.4h.9Zm2.3 1.1c.6 0 1 .4 1 1v1.2c0 .6-.4 1-1 1s-1-.4-1-1v-1.2c0-.6.4-1 1-1Zm7 0c.6 0 1 .4 1 1v1.2c0 .6-.4 1-1 1s-1-.4-1-1v-1.2c0-.6.4-1 1-1Z" />
+          <path d="m8.2 3.2 2.5 2.7h2.6l2.5-2.7 1.4 1.3-1.3 1.4h1.9A3.2 3.2 0 0 1 21 9.1v8.1a3.2 3.2 0 0 1-3.2 3.2H6.2A3.2 3.2 0 0 1 3 17.2V9.1a3.2 3.2 0 0 1 3.2-3.2h1.9L6.8 4.5l1.4-1.3Zm-2 4.9c-.6 0-1 .4-1 1v8.1c0 .6.4 1 1 1h11.6c.6 0 1-.4 1-1V9.1c0-.6-.4-1-1-1H6.2Zm2.4 4.2c.6 0 1 .4 1 1v1.4c0 .6-.4 1-1 1s-1-.4-1-1v-1.4c0-.6.4-1 1-1Zm6.8 0c.6 0 1 .4 1 1v1.4c0 .6-.4 1-1 1s-1-.4-1-1v-1.4c0-.6.4-1 1-1Z" />
         </svg>`;
   }
   return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">

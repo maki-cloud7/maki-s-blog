@@ -1732,10 +1732,18 @@ function renderOwnerToolbar(session = {}) {
     toolbar.classList.add("owner-toolbar--archive");
   }
   toolbar.dataset.editorToolbar = "true";
-  const actions = currentPostShell
-    ? '<button class="owner-toolbar__button" type="button" data-editor-edit>Edit</button><button class="owner-toolbar__button owner-toolbar__button--danger" type="button" data-editor-delete>Delete</button>'
-    : '<button class="owner-toolbar__button" type="button" data-editor-new>New post</button><a class="owner-toolbar__link" href="/api/auth/logout">Sign out</a>';
+  const next = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
+  const isAuthorized = Boolean(session.authorized);
+  const actions = isAuthorized
+    ? (currentPostShell
+      ? '<button class="owner-toolbar__button" type="button" data-editor-edit>编辑文章</button><button class="owner-toolbar__button owner-toolbar__button--danger" type="button" data-editor-delete>删除文章</button>'
+      : '<button class="owner-toolbar__button" type="button" data-editor-new>新增文章</button><a class="owner-toolbar__link" href="/api/auth/logout">退出登录</a>')
+    : `<a class="owner-toolbar__button" href="/api/auth/login?next=${next}">${currentPostShell ? "管理文章" : "写新文章"}</a>`;
   toolbar.innerHTML = `
+    <div class="owner-toolbar__identity">
+      <span>${isAuthorized ? "owner mode" : "editor access"}</span>
+      <strong>${isAuthorized ? "已登录" : "登录后可新增 / 编辑 / 删除"}</strong>
+    </div>
     <div class="owner-toolbar__actions">
       ${actions}
     </div>
@@ -1789,9 +1797,12 @@ async function initOwnerEditor() {
       localStorage.setItem(ownerRememberKey, "1");
       document.querySelector("[data-editor-toolbar]")?.remove();
       renderOwnerToolbar(editorSession);
+    } else {
+      renderOwnerToolbar(editorSession);
     }
   } catch {
     editorSession = null;
+    renderOwnerToolbar({ authorized: false });
   }
 }
 
