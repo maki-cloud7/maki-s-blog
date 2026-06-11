@@ -9,7 +9,7 @@ const friendsFile = path.join(root, "content", "friends.json");
 const tagsFile = path.join(root, "content", "tags.json");
 const socialsFile = path.join(root, "content", "socials.json");
 const outputDir = path.join(root, "posts");
-const assetVersion = "8.8-calm-post-field";
+const assetVersion = "8.9-home-post-rhythm";
 const siteUrl = "https://maki-s-blog.vercel.app";
 const siteTitle = "maki's blog";
 const siteDescription = "maki 的个人博客，用来记录技术、想法、作品和生活。";
@@ -509,7 +509,7 @@ async function loadPosts() {
 
 function renderHomeCards(posts) {
   return posts.slice(0, 3).map((post) => `              <a class="writing-card" href="${post.url}">
-                <span class="writing-card__date">${formatDate(post.date)}</span>
+                <span class="writing-card__date">${formatDateTime(post.date)}</span>
                 <h3>${escapeHtml(post.title)}</h3>
                 <p>${escapeHtml(post.summary)}</p>
                 <span class="writing-card__tags">${post.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</span>
